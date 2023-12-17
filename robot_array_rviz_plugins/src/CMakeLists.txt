@@ -20,10 +20,11 @@ endif()
 # because they can conflict with boost signals, so define QT_NO_KEYWORDS here.
 add_definitions(-DQT_NO_KEYWORDS)
 
-add_library(robot_array_msgs SingleRobotStateArrayDisplay.cpp
-                             SingleRobotStateArrayVisual.cpp)
+add_library(robot_array_rviz_plugins SingleRobotStateArrayDisplay.cpp
+                                     SingleRobotStateArrayVisual.cpp)
 
-target_include_directories(robot_array_msgs PUBLIC ${catkin_INCLUDE_DIRS})
+target_include_directories(robot_array_rviz_plugins
+                           PUBLIC ${catkin_INCLUDE_DIRS})
 
-target_link_libraries(robot_array_msgs RBDyn::RBDyn RBDyn::Parsers
+target_link_libraries(robot_array_rviz_plugins RBDyn::RBDyn RBDyn::Parsers
                       ${QT_LIBRARIES} ${catkin_LIBRARIES})
