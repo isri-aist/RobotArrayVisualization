@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.1)
+project(robot_array_rviz_plugins)
+
+set(CMAKE_CXX_STANDARD 17)
+
+find_package(catkin REQUIRED COMPONENTS roscpp rviz robot_array_msgs)
+
+find_package(RBDyn REQUIRED)
+
+catkin_package(CATKIN_DEPENDS roscpp rviz robot_array_msgs LIBRARIES
+               robot_array_rviz_plugins)
+
+add_subdirectory(src)

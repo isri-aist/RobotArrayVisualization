@@ -1,0 +1,26 @@
+<package format="2">
+  <name>robot_array_rviz_plugins</name>
+  <version>0.1.0</version>
+  <description>
+    Rviz plugins for visualization of robot arrays
+  </description>
+  <maintainer email="m-murooka@aist.go.jp">Masaki Murooka</maintainer>
+  <license>BSD</license>
+
+  <url>http://ros.org/wiki/robot_array_rviz_plugins</url>
+  <author>Masaki Murooka</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>rviz</depend>
+  <depend>robot_array_msgs</depend>
+
+  <build_depend>eigen</build_depend>
+
+  <doc_depend>doxygen</doc_depend>
+
+  <export>
+    <rviz plugin="${prefix}/plugin_description.xml"/>
+  </export>
+</package>
