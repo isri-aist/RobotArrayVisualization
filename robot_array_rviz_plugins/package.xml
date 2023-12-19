@@ -17,6 +17,14 @@
   <depend>robot_array_msgs</depend>
 
   <build_depend>eigen</build_depend>
+  <build_depend>libogre-dev</build_depend>
+  <build_depend>qtbase5-dev</build_depend>
+  <build_depend>libqt5-opengl-dev</build_depend>
+
+  <exec_depend>libqt5-core</exec_depend>
+  <exec_depend>libqt5-gui</exec_depend>
+  <exec_depend>libqt5-widgets</exec_depend>
+  <exec_depend>libqt5-opengl</exec_depend>
 
   <test_depend>rosunit</test_depend>
   <test_depend>rostest</test_depend>

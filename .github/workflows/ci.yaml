@@ -1,0 +1,160 @@
+name: CI of RobotArrayVisualization
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04]
+        build-type: [RelWithDebInfo, Debug]
+        mc-rtc-version: [head, stable]
+        compiler: [gcc]
+        exclude:
+          - build-type: Debug
+            mc-rtc-version: stable
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Setup environment variables
+        run: |
+          set -e
+          set -x
+          if [ "${{ matrix.os }}" == "ubuntu-20.04" ] && \
+             [ "${{ matrix.build-type }}" == "RelWithDebInfo" ] && \
+             [ "${{ matrix.mc-rtc-version }}" == "head" ] && \
+             [ "${{ matrix.compiler }}" == "gcc" ]
+          then
+            echo "RUN_SIMULATION_STEPS=true" >> $GITHUB_ENV
+          else
+            echo "RUN_SIMULATION_STEPS=false" >> $GITHUB_ENV
+          fi
+          if [ "${{ matrix.os }}" == "ubuntu-20.04" ] && \
+             [ "${{ matrix.build-type }}" == "RelWithDebInfo" ] && \
+             [ "${{ matrix.mc-rtc-version }}" == "head" ] && \
+             [ "${{ matrix.compiler }}" == "gcc" ]
+          then
+            echo "UPLOAD_DOCUMENTATION=true" >> $GITHUB_ENV
+          else
+            echo "UPLOAD_DOCUMENTATION=false" >> $GITHUB_ENV
+          fi
+          echo "DISPLAY=:1" >> $GITHUB_ENV
+      - name: Install dependencies
+        uses: jrl-umi3218/github-actions/install-dependencies@master
+        with:
+          ubuntu: |
+            apt-mirrors:
+              mc-rtc:
+                cloudsmith: mc-rtc/${{ matrix.mc-rtc-version }}
+            apt: librbdyn-dev doxygen graphviz
+          ros: |
+            apt: ros-base
+      - name: Setup display
+        run: |
+          set -e
+          set -x
+          sudo apt-get install -y -qq xvfb ffmpeg mesa-utils fluxbox xserver-xorg xserver-xorg-core xserver-xorg-video-all libwayland-egl1-mesa
+          Xvfb ${{ env.DISPLAY }} -screen 0 1920x1080x24 &
+          sleep 10s
+          fluxbox 2> /dev/null &
+      - name: Catkin build
+        uses: jrl-umi3218/github-actions/build-catkin-project@master
+        with:
+          build-type: ${{ matrix.build-type }}
+          cmake-args: -DINSTALL_DOCUMENTATION=${{ env.UPLOAD_DOCUMENTATION }}
+          catkin-test-args: --no-deps
+          build-packages: robot_array_rviz_plugins
+          test-packages: robot_array_rviz_plugins
+      # - name: Run simulation
+      #   if: env.RUN_SIMULATION_STEPS == 'true'
+      #   # https://github.com/jrl-umi3218/lipm_walking_controller/blob/b564d655388ae6a6725c504e5c74a62192e58c7c/.github/workflows/build.yml#L64-L92
+      #   run: |
+      #     set -e
+      #     set -x
+      #     sudo apt-get install -y -qq xvfb ffmpeg mesa-utils fluxbox xserver-xorg xserver-xorg-core xserver-xorg-video-all libwayland-egl1-mesa
+      #     set +x
+      #     if [ "${{ matrix.catkin-build }}" == "catkin" ]
+      #     then
+      #       . ${GITHUB_WORKSPACE}/catkin_ws/devel/setup.bash
+      #     fi
+      #     set -x
+      #     export DISPLAY=":1"
+      #     Xvfb ${DISPLAY} -screen 0 1920x1080x24 &
+      #     sleep 10s
+      #     fluxbox 2> /dev/null &
+      #     mkdir -p ${HOME}/.config/mc_rtc/controllers
+      #     if [ "${{ matrix.catkin-build }}" == "catkin" ]
+      #     then
+      #       cp ${GITHUB_WORKSPACE}/catkin_ws/src/${{ github.repository }}/etc/mc_rtc.yaml ${HOME}/.config/mc_rtc
+      #     else
+      #       echo "Enabled: RobotArrayVisualization" > ${HOME}/.config/mc_rtc/mc_rtc.yaml
+      #     fi
+      #     python3 ${{ env.CI_DIR }}/scripts/mergeConfigs.py ${{ env.CI_DIR }}/config/${{ matrix.mpc-method }}.yaml ${{ env.CI_DIR }}/config/${{ matrix.mpc-framework }}.yaml ${{ env.CI_DIR }}/config/${{ matrix.motion-type }}.yaml > ${HOME}/.config/mc_rtc/controllers/RobotArrayVisualization.yaml
+      #     ffmpeg -y -f x11grab -s 1920x1080 -r 30 -i ${DISPLAY} -qscale 0 -vcodec huffyuv /tmp/video.avi > /dev/null 2>&1 < /dev/null &
+      #     FFMPEG_PID=$!
+      #     cd /usr/share/hrpsys/samples/JVRC1
+      #     ./clear-omninames.sh
+      #     roscore > /dev/null 2>&1 < /dev/null &
+      #     ROSCORE_PID=$!
+      #     sleep 1s
+      #     if [ "${{ matrix.motion-type }}" == "WalkingOnPlane" -o "${{ matrix.motion-type }}" == "WalkingOnPlaneWaypoint" -o "${{ matrix.motion-type }}" == "WalkingOnPlaneVel" ]; then
+      #       CNOID_FILE=sim_mc.cnoid
+      #     else
+      #       CNOID_FILE=sim_mc_comanoid_staircase.cnoid
+      #     fi
+      #     choreonoid ${CNOID_FILE} --test-mode --start-simulation &
+      #     CNOID_PID=$!
+      #     if [ "${{ matrix.motion-type }}" == "WalkingWithFootstepPlanner" ]; then
+      #       SLEEP_DURATION="70s"
+      #     else
+      #       SLEEP_DURATION="50s"
+      #     fi
+      #     sleep ${SLEEP_DURATION}
+      #     kill -2 ${ROSCORE_PID}
+      #     kill -2 ${CNOID_PID}
+      #     kill -2 ${FFMPEG_PID}
+      #     sleep 1s
+      #     kill -9 ${CNOID_PID} || true
+      #     sleep 10s
+      #     mkdir -p /tmp/results
+      #     ffmpeg -nostats -i /tmp/video.avi /tmp/results/BWC-video-${RESULTS_POSTFIX}.mp4
+      #     LOG_FILENAME=BWC-log-${RESULTS_POSTFIX}
+      #     mv `readlink -f /tmp/mc-control-RobotArrayVisualization-latest.bin` /tmp/${LOG_FILENAME}.bin
+      #     tar czf /tmp/results/${LOG_FILENAME}.tar.gz -C /tmp ${LOG_FILENAME}.bin
+      # - name: Upload simulation data
+      #   if: env.RUN_SIMULATION_STEPS == 'true'
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: BWC-ci-results-${{ matrix.catkin-build }}
+      #     path: /tmp/results
+      # - name: Upload documentation
+      #   if: env.UPLOAD_DOCUMENTATION == 'true'
+      #   run: |
+      #     set -e
+      #     set -x
+      #     cd ${GITHUB_WORKSPACE}/catkin_ws/src/${{ github.repository }}
+      #     git config --global user.name "Masaki Murooka"
+      #     git config --global user.email "m-murooka@aist.go.jp"
+      #     git remote set-url origin "https://mmurooka:${{ secrets.CI_TOKEN }}@github.com/isri-aist/RobotArrayVisualization"
+      #     git fetch --depth=1 origin gh-pages:gh-pages
+      #     git clean -dfx
+      #     rm -rf cmake/
+      #     git checkout --quiet gh-pages
+      #     rm -rf doxygen/
+      #     cp -r ${GITHUB_WORKSPACE}/catkin_ws/build/robot_array_rviz_plugins/doc/html/ doxygen
+      #     git add doxygen
+      #     git_status=`git status -s`
+      #     if test -n "$git_status"; then
+      #       git commit --quiet -m "Update Doxygen HTML files from commit ${{ github.sha }}"
+      #       git push origin gh-pages
+      #     else
+      #       echo "Github pages documentation is already up-to-date."
+      #     fi
