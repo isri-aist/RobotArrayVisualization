@@ -37,6 +37,8 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
 
         rate = rospy.Rate(30)
         start_t = rospy.get_time()
+        fail_count = 0
+        fail_count_thre = 5
         while not rospy.is_shutdown():
             t = rospy.get_time()
 
@@ -53,7 +55,11 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
 
             pub.publish(robot_state_arr_msg)
 
-            if not rosnode.rosnode_ping("rviz", max_count=1):
+            if rosnode.rosnode_ping("rviz", max_count=1):
+                fail_count = 0
+            else:
+                fail_count += 1
+            if fail_count >= fail_count_thre:
                 rospy.logerr("Ping to rviz failed")
                 sys.exit(1)
 
