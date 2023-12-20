@@ -83,13 +83,9 @@ jobs:
           FFMPEG_PID=$!
           sleep 1s
           rostest robot_array_rviz_plugins TestSingleRobotStateArrayDisplay.test --text
-          RVIZ_PID=$!
-          sleep 30s
-          kill -2 ${RVIZ_PID}
+          sleep 5s
           kill -2 ${FFMPEG_PID}
-          sleep 1s
-          kill -9 ${RVIZ_PID} || true
-          sleep 10s
+          sleep 5s
           mkdir -p /tmp/results
           ffmpeg -nostats -i /tmp/video.avi /tmp/results/RARP-video.mp4
       - name: Upload video
