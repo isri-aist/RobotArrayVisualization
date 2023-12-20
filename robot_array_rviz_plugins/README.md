@@ -10,4 +10,4 @@ Display an array of single robots from messages of [`robot_array_msgs/RobotState
 $ rostest robot_array_rviz_plugins TestSingleRobotStateArrayDisplay.test --text
 ```
 
-https://github.com/mmurooka/RobotArrayVisualization/assets/6636600/6f4c1802-7c85-4b82-b884-db6e8389e013
+https://github.com/isri-aist/RobotArrayVisualization/assets/6636600/4eae6e07-738d-490e-b254-1b02bcb04e8c
