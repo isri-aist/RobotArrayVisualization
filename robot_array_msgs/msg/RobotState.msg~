@@ -1,6 +1,0 @@
-string name
-
-geometry_msgs/PoseStamped root_pose
-
-string[] joint_name_list
-float64[] joint_pos_list
