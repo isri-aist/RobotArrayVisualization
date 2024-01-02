@@ -18,7 +18,7 @@ class EnumProperty;
 
 namespace RobotArrayRvizPlugins
 {
-class SingleRobotStateArrayVisual;
+class RobotStateArrayVisual;
 class ColorPropertySet;
 
 class MultiRobotStateArrayDisplay : public rviz::Display
@@ -83,7 +83,7 @@ protected:
   ros::NodeHandle nh_;
   ros::Subscriber subscriber_;
 
-  std::shared_ptr<SingleRobotStateArrayVisual> visual_;
+  std::shared_ptr<RobotStateArrayVisual> visual_;
 
   std::unordered_map<std::string, urdf::ModelInterfaceSharedPtr> urdf_model_map_;
 

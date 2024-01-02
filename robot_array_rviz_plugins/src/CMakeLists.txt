@@ -22,8 +22,8 @@ add_definitions(-DQT_NO_KEYWORDS)
 
 add_library(
   robot_array_rviz_plugins
-  ColorPropertySet.cpp SingleRobotStateArrayDisplay.cpp
-  SingleRobotStateArrayVisual.cpp MultiRobotStateArrayDisplay.cpp)
+  ColorPropertySet.cpp RobotStateArrayVisual.cpp
+  SingleRobotStateArrayDisplay.cpp MultiRobotStateArrayDisplay.cpp)
 
 target_include_directories(robot_array_rviz_plugins
                            PUBLIC ${catkin_INCLUDE_DIRS})

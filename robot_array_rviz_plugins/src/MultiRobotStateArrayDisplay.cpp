@@ -4,7 +4,7 @@
 #include <RBDyn/parsers/urdf.h>
 
 #include "ColorPropertySet.h"
-#include "SingleRobotStateArrayVisual.h"
+#include "RobotStateArrayVisual.h"
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
@@ -89,7 +89,7 @@ void MultiRobotStateArrayDisplay::reset()
 void MultiRobotStateArrayDisplay::onInitialize()
 {
   Display::onInitialize();
-  visual_ = std::make_shared<SingleRobotStateArrayVisual>();
+  visual_ = std::make_shared<RobotStateArrayVisual>();
 }
 
 void MultiRobotStateArrayDisplay::onEnable()

@@ -7,12 +7,12 @@
 
 namespace RobotArrayRvizPlugins
 {
-class SingleRobotStateArrayVisual
+class RobotStateArrayVisual
 {
 public:
-  SingleRobotStateArrayVisual();
+  RobotStateArrayVisual();
 
-  ~SingleRobotStateArrayVisual();
+  ~RobotStateArrayVisual();
 
   void reset();
 

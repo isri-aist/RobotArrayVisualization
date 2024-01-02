@@ -1,4 +1,4 @@
-#include "SingleRobotStateArrayVisual.h"
+#include "RobotStateArrayVisual.h"
 
 #include "RbdLinkUpdater.h"
 
@@ -18,11 +18,11 @@
 
 using namespace RobotArrayRvizPlugins;
 
-SingleRobotStateArrayVisual::SingleRobotStateArrayVisual() {}
+RobotStateArrayVisual::RobotStateArrayVisual() {}
 
-SingleRobotStateArrayVisual::~SingleRobotStateArrayVisual() {}
+RobotStateArrayVisual::~RobotStateArrayVisual() {}
 
-void SingleRobotStateArrayVisual::reset()
+void RobotStateArrayVisual::reset()
 {
   for(auto & robot : robot_list_)
   {
@@ -30,12 +30,12 @@ void SingleRobotStateArrayVisual::reset()
   }
 }
 
-void SingleRobotStateArrayVisual::reset(int idx)
+void RobotStateArrayVisual::reset(int idx)
 {
   robot_list_[idx]->clear();
 }
 
-void SingleRobotStateArrayVisual::update(const rbd::MultiBody & mb, const std::vector<rbd::MultiBodyConfig> & mbc_list)
+void RobotStateArrayVisual::update(const rbd::MultiBody & mb, const std::vector<rbd::MultiBodyConfig> & mbc_list)
 {
   assert(mb.joint(0).name() == "Root");
   assert(robot_list_.size() == mbc_list.size());
@@ -49,7 +49,7 @@ void SingleRobotStateArrayVisual::update(const rbd::MultiBody & mb, const std::v
   }
 }
 
-void SingleRobotStateArrayVisual::update(int idx, const rbd::MultiBody & mb, const rbd::MultiBodyConfig & mbc)
+void RobotStateArrayVisual::update(int idx, const rbd::MultiBody & mb, const rbd::MultiBodyConfig & mbc)
 {
   if(!robot_list_[idx]->isVisible())
   {
@@ -61,10 +61,10 @@ void SingleRobotStateArrayVisual::update(int idx, const rbd::MultiBody & mb, con
   robot_list_[idx]->update(RbdLinkUpdater(&mb, &mbc));
 }
 
-void SingleRobotStateArrayVisual::allocateRobotModel(int num,
-                                                     Ogre::SceneNode * root_node,
-                                                     rviz::DisplayContext * context,
-                                                     rviz::Property * parent_property)
+void RobotStateArrayVisual::allocateRobotModel(int num,
+                                               Ogre::SceneNode * root_node,
+                                               rviz::DisplayContext * context,
+                                               rviz::Property * parent_property)
 {
   robot_list_.clear();
   for(auto & robot_property : robot_property_list_)
@@ -88,7 +88,7 @@ void SingleRobotStateArrayVisual::allocateRobotModel(int num,
   }
 }
 
-void SingleRobotStateArrayVisual::loadRobotModel(const urdf::ModelInterface & urdf_model)
+void RobotStateArrayVisual::loadRobotModel(const urdf::ModelInterface & urdf_model)
 {
   // robot->clear() should be called before robot->load():
   // http://docs.ros.org/jade/api/rviz/html/c++/classrviz_1_1Robot.html#a4b3e851dd812df29f9458afa92e81d3a
@@ -103,7 +103,7 @@ void SingleRobotStateArrayVisual::loadRobotModel(const urdf::ModelInterface & ur
   }
 }
 
-void SingleRobotStateArrayVisual::loadRobotModel(int idx, const urdf::ModelInterface & urdf_model)
+void RobotStateArrayVisual::loadRobotModel(int idx, const urdf::ModelInterface & urdf_model)
 {
   auto & robot = robot_list_[idx];
 
@@ -117,7 +117,7 @@ void SingleRobotStateArrayVisual::loadRobotModel(int idx, const urdf::ModelInter
   robot->setVisible(false);
 }
 
-void SingleRobotStateArrayVisual::setVisible(int num)
+void RobotStateArrayVisual::setVisible(int num)
 {
   for(int i = 0; i < robot_list_.size(); i++)
   {
@@ -136,7 +136,7 @@ void SingleRobotStateArrayVisual::setVisible(int num)
   }
 }
 
-void SingleRobotStateArrayVisual::setColor(int idx, bool original, const Ogre::ColourValue & color)
+void RobotStateArrayVisual::setColor(int idx, bool original, const Ogre::ColourValue & color)
 {
   for(auto & link : robot_list_[idx]->getLinks())
   {
