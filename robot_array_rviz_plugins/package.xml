@@ -29,6 +29,7 @@
   <test_depend>rosunit</test_depend>
   <test_depend>rostest</test_depend>
   <test_depend>franka_description</test_depend>
+  <test_depend>ur_description</test_depend>
 
   <doc_depend>doxygen</doc_depend>
 

@@ -1,0 +1,17 @@
+<launch>
+  <param name="robot_description_panda" command="xacro $(find franka_description)/robots/panda/panda.urdf.xacro" />
+  <param name="robot_description_ur5e" command="xacro $(find ur_description)/urdf/ur5e.xacro" />
+  <rosparam param="robot_description_map">
+      panda: robot_description_panda
+      ur5e: robot_description_ur5e
+  </rosparam>
+
+  <!-- Rviz cannot be used with the test tag because rviz raises an error for command line arguments that gtest adds. -->
+  <test test-name="MultiRobotStateArrayDisplay"
+        pkg="robot_array_rviz_plugins" type="testMultiRobotStateArrayClient.py" name="client"
+        time-limit="180.0" />
+
+  <node pkg="rviz" type="rviz" name="rviz"
+        args="-d $(find robot_array_rviz_plugins)/tests/rviz/TestMultiRobotStateArrayDisplay.rviz"
+        output="screen" />
+</launch>

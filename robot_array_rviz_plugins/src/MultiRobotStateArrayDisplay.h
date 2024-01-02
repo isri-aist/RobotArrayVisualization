@@ -4,13 +4,13 @@
 
 #include <robot_array_msgs/RobotStateArray.h>
 
+#include <OgreColourValue.h>
 #include <rviz/display.h>
 #include <urdf/model.h>
 
 namespace rviz
 {
 class StringProperty;
-class BoolProperty;
 class IntProperty;
 class RosTopicProperty;
 class EnumProperty;
@@ -21,7 +21,7 @@ namespace RobotArrayRvizPlugins
 class RobotStateArrayVisual;
 class ColorPropertySet;
 
-class SingleRobotStateArrayDisplay : public rviz::Display
+class MultiRobotStateArrayDisplay : public rviz::Display
 {
   Q_OBJECT
 
@@ -29,15 +29,14 @@ protected:
   enum class ColorStyle
   {
     UNIFORM = 0,
-    FIRST,
-    FIRST_LAST,
-    GRADATION
+    GRADATION_EACH_ROBOT,
+    GRADATION_ROBOT_TYPE
   };
 
 public:
-  SingleRobotStateArrayDisplay();
+  MultiRobotStateArrayDisplay();
 
-  virtual ~SingleRobotStateArrayDisplay();
+  virtual ~MultiRobotStateArrayDisplay();
 
   virtual void load(const rviz::Config & config) override;
 
@@ -58,6 +57,10 @@ protected:
 
   void loadUrdfModel();
 
+  std::vector<std::array<Ogre::Real, 4>> getHsbList() const;
+
+  Ogre::ColourValue getInterpColor(double ratio, const std::vector<std::array<Ogre::Real, 4>> & hsb_list) const;
+
 private Q_SLOTS:
   void changedRobotDescription();
 
@@ -72,7 +75,6 @@ private Q_SLOTS:
 protected:
   rviz::StringProperty * robot_description_property_;
   rviz::RosTopicProperty * topic_property_;
-  rviz::BoolProperty * check_name_property_;
   rviz::IntProperty * robot_num_property_;
   rviz::Property * robots_property_;
   rviz::EnumProperty * color_style_property_;
@@ -83,12 +85,13 @@ protected:
 
   std::shared_ptr<RobotStateArrayVisual> visual_;
 
-  urdf::ModelInterfaceSharedPtr urdf_model_;
+  std::unordered_map<std::string, urdf::ModelInterfaceSharedPtr> urdf_model_map_;
 
-  rbd::MultiBody mb_;
+  std::unordered_map<std::string, rbd::MultiBody> mb_map_;
+  std::unordered_map<std::string, rbd::MultiBodyConfig> mbc_map_;
+
+  std::vector<std::string> name_list_;
   std::vector<rbd::MultiBodyConfig> mbc_list_;
-
-  std::string name_;
 
   bool robot_inited_ = false;
   bool state_updated_ = false;
