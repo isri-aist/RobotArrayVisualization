@@ -19,9 +19,16 @@ jobs:
         build-type: [RelWithDebInfo, Debug]
         mc-rtc-version: [head, stable]
         compiler: [gcc]
+        test-name: [TestSingleRobotStateArrayDisplay]
         exclude:
           - build-type: Debug
             mc-rtc-version: stable
+        include:
+          - os: ubuntu-20.04
+            build-type: RelWithDebInfo
+            mc-rtc-version: head
+            compiler: gcc
+            test-name: TestMultiRobotStateArrayDisplay
     runs-on: ${{ matrix.os }}
     steps:
       - name: Setup environment variables
@@ -72,12 +79,12 @@ jobs:
           ffmpeg -y -f x11grab -s 1920x1080 -r 30 -i ${DISPLAY} -qscale 0 -vcodec huffyuv /tmp/video.avi > /dev/null 2>&1 < /dev/null &
           FFMPEG_PID=$!
           sleep 1s
-          rostest robot_array_rviz_plugins TestSingleRobotStateArrayDisplay.test --text
+          rostest robot_array_rviz_plugins ${{ matrix.test-name }}.test --text
           sleep 5s
           kill -2 ${FFMPEG_PID}
           sleep 5s
           mkdir -p /tmp/results
-          ffmpeg -nostats -i /tmp/video.avi /tmp/results/RARP-video.mp4
+          ffmpeg -nostats -i /tmp/video.avi /tmp/results/RARP-video-${{ matrix.test-name }}.mp4
       - name: Upload video
         if: env.RUN_RECORDING_STEPS == 'true'
         uses: actions/upload-artifact@v3
