@@ -1,19 +1,18 @@
 #include "SingleRobotStateArrayDisplay.h"
 
+#include <RBDyn/FK.h>
 #include <RBDyn/parsers/urdf.h>
 
 #include "ColorPropertySet.h"
+#include "SingleRobotStateArrayVisual.h"
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 #include <rviz/display_context.h>
 #include <rviz/frame_manager.h>
 #include <rviz/properties/bool_property.h>
-#include <rviz/properties/color_property.h>
 #include <rviz/properties/enum_property.h>
-#include <rviz/properties/float_property.h>
 #include <rviz/properties/int_property.h>
-#include <rviz/properties/property.h>
 #include <rviz/properties/ros_topic_property.h>
 #include <rviz/properties/string_property.h>
 #include <rviz/robot/robot.h>
@@ -114,7 +113,6 @@ void SingleRobotStateArrayDisplay::fixedFrameChanged() {}
 
 void SingleRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msgs::RobotStateArray::ConstPtr & msg)
 {
-  // get the transformation from the fixed frame to the message frame
   const std::string & first_frame_id = msg->robot_states[0].root_pose.header.frame_id;
 
   // assume that the frame_ids of all robot states are the same
@@ -123,6 +121,7 @@ void SingleRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msg
     assert(first_frame_id == msg->robot_states[i].root_pose.header.frame_id);
   }
 
+  // get the transformation from the fixed frame to the message frame
   Ogre::Vector3 frame_pos;
   Ogre::Quaternion frame_quat;
   context_->getFrameManager()->getTransform(first_frame_id, ros::Time(0), frame_pos, frame_quat);

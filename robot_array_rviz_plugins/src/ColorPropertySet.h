@@ -1,6 +1,7 @@
 #pragma once
 
 #include <OgreColourValue.h>
+#include <rviz/display.h>
 #include <rviz/properties/property.h>
 
 namespace rviz
@@ -12,14 +13,12 @@ class ColorProperty;
 
 namespace RobotArrayRvizPlugins
 {
-class SingleRobotStateArrayDisplay;
-
 class ColorPropertySet : public rviz::Property
 {
   Q_OBJECT
 
 public:
-  ColorPropertySet(const std::string & name, SingleRobotStateArrayDisplay * display, rviz::Property * parent_property);
+  ColorPropertySet(const std::string & name, rviz::Display * display, rviz::Property * parent_property);
 
   void setName(const std::string & name);
 
@@ -31,9 +30,6 @@ public:
 
 private Q_SLOTS:
   void changedOriginal();
-
-protected:
-  SingleRobotStateArrayDisplay * display_;
 
 public:
   rviz::Property * label_property_;

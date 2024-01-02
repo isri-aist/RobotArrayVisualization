@@ -16,7 +16,11 @@ public:
 
   void reset();
 
+  void reset(int idx);
+
   void update(const rbd::MultiBody & mb, const std::vector<rbd::MultiBodyConfig> & mbc_list);
+
+  void update(int idx, const rbd::MultiBody & mb, const rbd::MultiBodyConfig & mbc);
 
   void allocateRobotModel(int num,
                           Ogre::SceneNode * root_node,
@@ -24,6 +28,8 @@ public:
                           rviz::Property * parent_property);
 
   void loadRobotModel(const urdf::ModelInterface & urdf_model);
+
+  void loadRobotModel(int idx, const urdf::ModelInterface & urdf_model);
 
   void setVisible(int num);
 

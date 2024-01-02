@@ -1,17 +1,12 @@
 #include "ColorPropertySet.h"
 
-#include "SingleRobotStateArrayDisplay.h"
-
 #include <rviz/properties/bool_property.h>
 #include <rviz/properties/color_property.h>
 #include <rviz/properties/float_property.h>
 
 using namespace RobotArrayRvizPlugins;
 
-ColorPropertySet::ColorPropertySet(const std::string & name,
-                                   SingleRobotStateArrayDisplay * display,
-                                   rviz::Property * parent_property)
-: display_(display)
+ColorPropertySet::ColorPropertySet(const std::string & name, rviz::Display * display, rviz::Property * parent_property)
 {
   label_property_ = new rviz::Property(QString::fromStdString(name), QVariant(), "", parent_property);
   label_property_->expand();
