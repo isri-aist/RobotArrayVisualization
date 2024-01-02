@@ -32,3 +32,5 @@ Display an array of multiple types of robots (i.e., robots with different URDF m
 ```bash
 $ rostest robot_array_rviz_plugins TestMultiRobotStateArrayDisplay.test --text
 ```
+
+https://github.com/isri-aist/RobotArrayVisualization/assets/6636600/5e33c0a1-9f30-4e1c-8373-fadb73d45124
