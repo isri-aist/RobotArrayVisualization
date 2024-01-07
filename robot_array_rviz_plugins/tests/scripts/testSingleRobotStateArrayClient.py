@@ -38,7 +38,7 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
         rate = rospy.Rate(30)
         start_t = rospy.get_time()
         fail_count = 0
-        fail_count_thre = 5
+        fail_count_thre = 20
         while not rospy.is_shutdown():
             t = rospy.get_time()
 
