@@ -223,7 +223,7 @@ void SingleRobotStateArrayDisplay::loadUrdfModel()
   visual_->loadRobotModel(*urdf_model_);
 
   // load robot model into mb_ and mbc_list_
-  rbd::parsers::ParserResult parse_res = rbd::parsers::from_urdf(urdf_content, false);
+  const rbd::parsers::ParserResult & parse_res = rbd::parsers::from_urdf(urdf_content, false);
   mb_ = parse_res.mb;
   name_ = parse_res.name;
   // parse_res.mbc is initialized by the forward kinematics calculation with the zero positions
