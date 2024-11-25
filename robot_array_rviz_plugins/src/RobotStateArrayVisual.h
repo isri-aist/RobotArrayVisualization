@@ -2,8 +2,8 @@
 
 #include <RBDyn/MultiBodyConfig.h>
 
-#include <rviz/display.h>
-#include <rviz/robot/robot.h>
+#include <rviz_common/display.hpp>
+#include <rviz_default_plugins/robot/robot.hpp>
 
 namespace RobotArrayRvizPlugins
 {
@@ -24,8 +24,8 @@ public:
 
   void allocateRobotModel(int num,
                           Ogre::SceneNode * root_node,
-                          rviz::DisplayContext * context,
-                          rviz::Property * parent_property);
+                          rviz_common::DisplayContext * context,
+                          rviz_common::properties::Property * parent_property);
 
   void loadRobotModel(const urdf::ModelInterface & urdf_model);
 
@@ -35,9 +35,9 @@ public:
 
   void setColor(int idx, bool original, const Ogre::ColourValue & color);
 
-  std::vector<std::shared_ptr<rviz::Robot>> robot_list_;
+  std::vector<std::shared_ptr<rviz_default_plugins::robot::Robot>> robot_list_;
 
 protected:
-  std::vector<rviz::BoolProperty *> robot_property_list_;
+  std::vector<rviz_common::properties::BoolProperty *> robot_property_list_;
 };
 } // namespace RobotArrayRvizPlugins

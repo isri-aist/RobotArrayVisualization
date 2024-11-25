@@ -7,15 +7,18 @@ on:
   pull_request:
     branches:
       - '**'
-  schedule:
-    - cron: '0 0 * * 0'
+  # schedule:
+  #   - cron: '0 0 * * 0'
+
+env:
+  ROS_DISTRO: humble
 
 jobs:
   build-and-test:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
         build-type: [RelWithDebInfo, Debug]
         mc-rtc-version: [head, stable]
         compiler: [gcc]
@@ -24,7 +27,7 @@ jobs:
           - build-type: Debug
             mc-rtc-version: stable
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             build-type: RelWithDebInfo
             mc-rtc-version: head
             compiler: gcc
@@ -35,7 +38,7 @@ jobs:
         run: |
           set -e
           set -x
-          if [ "${{ matrix.os }}" == "ubuntu-20.04" ] && \
+          if [ "${{ matrix.os }}" == "ubuntu-22.04" ] && \
              [ "${{ matrix.build-type }}" == "RelWithDebInfo" ] && \
              [ "${{ matrix.mc-rtc-version }}" == "head" ] && \
              [ "${{ matrix.compiler }}" == "gcc" ]
@@ -53,8 +56,19 @@ jobs:
               mc-rtc:
                 cloudsmith: mc-rtc/${{ matrix.mc-rtc-version }}
             apt: librbdyn-dev doxygen graphviz
-          ros: |
-            apt: ros-base
+      - name: Setup ROS2 Humble
+        run: |
+          set -e 
+          set -x
+          sudo apt install curl -y
+          sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+          sudo apt update
+          sudo apt upgrade
+          sudo apt install ros-humble-ros-base
+          sudo apt-get install -y python3-colcon-common-extensions python3-rosdep
+          echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+        shell: bash
       - name: Setup display
         run: |
           set -e
@@ -63,31 +77,50 @@ jobs:
           Xvfb ${{ env.DISPLAY }} -screen 0 1920x1080x24 &
           sleep 10s
           fluxbox 2> /dev/null &
-      - name: Catkin build
-        uses: jrl-umi3218/github-actions/build-catkin-project@master
+      - name: Checkout repository code
+        uses: actions/checkout@v3
         with:
-          build-type: ${{ matrix.build-type }}
-          catkin-test-args: --no-deps
-          build-packages: robot_array_rviz_plugins
-          test-packages: robot_array_rviz_plugins
-      - name: Record video
-        if: env.RUN_RECORDING_STEPS == 'true'
+          submodules: recursive
+      - name: Setup workspace
         run: |
-          . ${GITHUB_WORKSPACE}/catkin_ws/devel/setup.bash
+          mkdir -p ${GITHUB_WORKSPACE}/colcon_ws/src
+          cd ${GITHUB_WORKSPACE}/colcon_ws
+        shell: bash
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: colcon_ws/src/${{ github.repository }}
+      - name: Download dependent repository codes
+        run: |
           set -e
           set -x
-          ffmpeg -y -f x11grab -s 1920x1080 -r 30 -i ${DISPLAY} -qscale 0 -vcodec huffyuv /tmp/video.avi > /dev/null 2>&1 < /dev/null &
-          FFMPEG_PID=$!
-          sleep 1s
-          rostest robot_array_rviz_plugins ${{ matrix.test-name }}.test --text
-          sleep 5s
-          kill -2 ${FFMPEG_PID}
-          sleep 5s
-          mkdir -p /tmp/results
-          ffmpeg -nostats -i /tmp/video.avi /tmp/results/RARP-video-${{ matrix.test-name }}.mp4
-      - name: Upload video
-        if: env.RUN_RECORDING_STEPS == 'true'
-        uses: actions/upload-artifact@v3
-        with:
-          name: RARP-ci-results
-          path: /tmp/results
+          cd ${GITHUB_WORKSPACE}/colcon_ws
+          if [ -f src/${{ github.repository }}/depends.rosinstall ]
+          then
+            wstool init src
+            wstool merge -t src src/${{ github.repository }}/depends.rosinstall -y
+            wstool update -t src
+          fi
+        shell: bash
+      - name: Rosdep install
+        run: |
+          set -e
+          set -x
+          cd ${GITHUB_WORKSPACE}/colcon_ws
+          if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]
+          then
+            sudo rosdep init
+          fi
+          rosdep update
+          rosdep install -y -r --from-paths src --ignore-src
+        shell: bash
+      - name: Colcon build
+        run: |
+          set -e
+          set -x
+          source /opt/ros/humble/setup.bash
+          cd ${GITHUB_WORKSPACE}/colcon_ws
+          COLCON_OPTIONS="--merge-install"
+          colcon build ${COLCON_OPTIONS} --packages-select robot_array_msgs --cmake-args -DCMAKE_BUILD_TYPE=${{ matrix.build-type }}
+        shell: bash

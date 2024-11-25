@@ -2,15 +2,15 @@
 
 #include <RBDyn/MultiBodyConfig.h>
 
-#include <ros/console.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include <OgreQuaternion.h>
 #include <OgreVector3.h>
-#include <rviz/robot/link_updater.h>
+#include <rviz_default_plugins/robot/link_updater.hpp>
 
 namespace RobotArrayRvizPlugins
 {
-class RbdLinkUpdater : public rviz::LinkUpdater
+class RbdLinkUpdater : public rviz_default_plugins::robot::LinkUpdater
 {
 public:
   RbdLinkUpdater(const rbd::MultiBody * mb, const rbd::MultiBodyConfig * mbc) : mb_(mb), mbc_(mbc) {}
@@ -40,7 +40,7 @@ public:
     }
     else
     {
-      ROS_ERROR_STREAM("link " << link_name << " not found in the RBDyn robot model.");
+    //   ROS_ERROR_STREAM("link " << link_name << " not found in the RBDyn robot model.");
       return false;
     }
 

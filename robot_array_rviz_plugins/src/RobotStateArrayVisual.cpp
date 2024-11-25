@@ -4,17 +4,17 @@
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
-#include <rviz/display_context.h>
-#include <rviz/frame_manager.h>
-#include <rviz/properties/bool_property.h>
-#include <rviz/properties/color_property.h>
-#include <rviz/properties/float_property.h>
-#include <rviz/properties/property.h>
-#include <rviz/properties/ros_topic_property.h>
-#include <rviz/properties/string_property.h>
-#include <rviz/robot/robot.h>
-#include <rviz/robot/robot_link.h>
-#include <rviz/visualization_manager.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/frame_manager_iface.hpp>
+#include <rviz_common/properties/bool_property.hpp>
+#include <rviz_common/properties/color_property.hpp>
+#include <rviz_common/properties/float_property.hpp>
+#include <rviz_common/properties/property.hpp>
+#include <rviz_common/properties/ros_topic_property.hpp>
+#include <rviz_common/properties/string_property.hpp>
+#include <rviz_default_plugins/robot/robot.hpp>
+#include <rviz_default_plugins/robot/robot_link.hpp>
+#include <rviz_common/visualization_manager.hpp>
 
 using namespace RobotArrayRvizPlugins;
 
@@ -63,8 +63,8 @@ void RobotStateArrayVisual::update(int idx, const rbd::MultiBody & mb, const rbd
 
 void RobotStateArrayVisual::allocateRobotModel(int num,
                                                Ogre::SceneNode * root_node,
-                                               rviz::DisplayContext * context,
-                                               rviz::Property * parent_property)
+                                               rviz_common::DisplayContext * context,
+                                               rviz_common::properties::Property * parent_property)
 {
   robot_list_.clear();
   for(auto & robot_property : robot_property_list_)
@@ -79,12 +79,12 @@ void RobotStateArrayVisual::allocateRobotModel(int num,
     idx_str << std::setw(3) << std::setfill('0') << i;
     std::string robot_name = "Robot_" + idx_str.str();
 
-    rviz::BoolProperty * robot_property = new rviz::BoolProperty(
+    rviz_common::properties::BoolProperty * robot_property = new rviz_common::properties::BoolProperty(
         QString::fromStdString(robot_name), true, "Specifies whether the robot is displayed", parent_property);
     robot_property_list_.push_back(robot_property);
     robot_property->hide();
 
-    robot_list_.push_back(std::make_shared<rviz::Robot>(root_node, context, robot_name, robot_property));
+    robot_list_.push_back(std::make_shared<rviz_default_plugins::robot::Robot>(root_node, context, robot_name, robot_property));
   }
 }
 
@@ -119,10 +119,11 @@ void RobotStateArrayVisual::loadRobotModel(int idx, const urdf::ModelInterface &
 
 void RobotStateArrayVisual::setVisible(int num)
 {
+  std::cout << "setVisible: " << num << std::endl;
   for(int i = 0; i < robot_list_.size(); i++)
   {
-    rviz::BoolProperty * robot_property = robot_property_list_[i];
-    std::shared_ptr<rviz::Robot> robot = robot_list_[i];
+    rviz_common::properties::BoolProperty * robot_property = robot_property_list_[i];
+    std::shared_ptr<rviz_default_plugins::robot::Robot> robot = robot_list_[i];
     if(i < num)
     {
       robot_property->show();

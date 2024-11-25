@@ -1,24 +1,24 @@
 #include "ColorPropertySet.h"
 
-#include <rviz/properties/bool_property.h>
-#include <rviz/properties/color_property.h>
-#include <rviz/properties/float_property.h>
+#include <rviz_common/properties/bool_property.hpp>
+#include <rviz_common/properties/color_property.hpp>
+#include <rviz_common/properties/float_property.hpp>
 
 using namespace RobotArrayRvizPlugins;
 
-ColorPropertySet::ColorPropertySet(const std::string & name, rviz::Display * display, rviz::Property * parent_property)
+ColorPropertySet::ColorPropertySet(const std::string & name, rviz_common::Display * display, rviz_common::properties::Property * parent_property)
 {
-  label_property_ = new rviz::Property(QString::fromStdString(name), QVariant(), "", parent_property);
+  label_property_ = new rviz_common::properties::Property(QString::fromStdString(name), QVariant(), "", parent_property);
   label_property_->expand();
 
-  original_property_ = new rviz::BoolProperty("Original Color", true, "Whether the original color is used",
+  original_property_ = new rviz_common::properties::BoolProperty("Original Color", true, "Whether the original color is used",
                                               label_property_, SLOT(changedOriginal()), this);
 
-  color_property_ = new rviz::ColorProperty("Color", QColor(150, 50, 150), "The color of the robot links",
+  color_property_ = new rviz_common::properties::ColorProperty("Color", QColor(150, 50, 150), "The color of the robot links",
                                             label_property_, SLOT(changedColor()), display);
   color_property_->hide();
 
-  alpha_property_ = new rviz::FloatProperty("Alpha", 1.0f, "The alpha of the robot links", label_property_,
+  alpha_property_ = new rviz_common::properties::FloatProperty("Alpha", 1.0f, "The alpha of the robot links", label_property_,
                                             SLOT(changedColor()), display);
 }
 
