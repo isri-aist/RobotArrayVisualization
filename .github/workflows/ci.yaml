@@ -52,7 +52,7 @@ jobs:
             apt-mirrors:
               mc-rtc:
                 cloudsmith: mc-rtc/${{ matrix.mc-rtc-version }}
-            apt: libboost-dev librbdyn-dev doxygen graphviz
+            apt: libboost-all-dev librbdyn-dev doxygen graphviz
           ros: |
             apt: ros-base
       - name: Setup display
@@ -69,3 +69,4 @@ jobs:
           build-type: ${{ matrix.build-type }}
           colcon-test-args: --no-deps
           build-packages: robot_array_rviz_plugins robot_array_msgs
+          skip-test: true

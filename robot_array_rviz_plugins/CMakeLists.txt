@@ -3,6 +3,11 @@ project(robot_array_rviz_plugins)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# Enable CMake policy CMP0148 for github actions
+if(POLICY CMP0148) 
+cmake_policy(SET CMP0148 OLD)
+endif()
+
 ###################
 # Depend packages #
 ###################
