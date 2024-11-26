@@ -52,7 +52,7 @@ jobs:
             apt-mirrors:
               mc-rtc:
                 cloudsmith: mc-rtc/${{ matrix.mc-rtc-version }}
-            apt: librbdyn-dev doxygen graphviz
+            apt: libboost-dev librbdyn-dev doxygen graphviz
           ros: |
             apt: ros-base
       - name: Setup display
