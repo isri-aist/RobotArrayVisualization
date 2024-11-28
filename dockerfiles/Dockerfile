@@ -20,5 +20,5 @@ WORKDIR /root/catkin_ws
 # set default bash shell
 SHELL ["/bin/bash", "-c"] 
 
-RUN source /opt/ros/humble/setup.bash && \
-  colcon build 
+RUN rosdep update && \
+  rosdep install --from-paths src --ignore-src -r -y

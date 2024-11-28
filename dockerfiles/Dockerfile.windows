@@ -23,3 +23,6 @@ WORKDIR /root/catkin_ws
 # Set environment variables (for using commands)
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "source /root/catkin_ws/install/setup.bash" >> ~/.bashrc
+
+RUN rosdep update && \
+  rosdep install --from-paths src --ignore-src -r -y
