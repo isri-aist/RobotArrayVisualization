@@ -7,12 +7,12 @@
     </description>
     <message_type>robot_array_msgs/msg/RobotStateArray</message_type>
   </class>
-  <!-- <class name="robot_array_rviz_plugins/MultiRobotStateArray"
+  <class name="robot_array_rviz_plugins/MultiRobotStateArray"
          type="RobotArrayRvizPlugins::MultiRobotStateArrayDisplay"
          base_class_type="rviz_common::Display">
     <description>
       Display an array of multiple types of robots (i.e., robots with different URDF models) from messages of robot_array_msgs/RobotStateArray.
     </description>
-    <message_type>robot_array_msgs/msg/RobotStateArray</message_type> -->
+    <message_type>robot_array_msgs/msg/RobotStateArray</message_type>
   </class>
 </library>

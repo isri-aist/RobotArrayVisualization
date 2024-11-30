@@ -1,27 +1,32 @@
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
 #include <RBDyn/MultiBodyConfig.h>
 
-#include <robot_array_msgs/RobotStateArray.h>
+#include <robot_array_msgs/msg/robot_state_array.hpp>
 
 #include <OgreColourValue.h>
-#include <rviz/display.h>
+#include <std_msgs/msg/string.hpp>
+#include <rviz_common/display.hpp>
 #include <urdf/model.h>
 
-namespace rviz
+namespace rviz_common
+{
+namespace properties
 {
 class StringProperty;
 class IntProperty;
 class RosTopicProperty;
 class EnumProperty;
-} // namespace rviz
+} 
+}// namespace rviz
 
 namespace RobotArrayRvizPlugins
 {
 class RobotStateArrayVisual;
 class ColorPropertySet;
 
-class MultiRobotStateArrayDisplay : public rviz::Display
+class MultiRobotStateArrayDisplay : public rviz_common::Display
 {
   Q_OBJECT
 
@@ -38,7 +43,7 @@ public:
 
   virtual ~MultiRobotStateArrayDisplay();
 
-  virtual void load(const rviz::Config & config) override;
+  virtual void load(const rviz_common::Config & config) override;
 
   virtual void update(float wall_dt, float ros_dt) override;
 
@@ -53,7 +58,9 @@ protected:
 
   virtual void fixedFrameChanged() override;
 
-  void robotStateArrayCallback(const robot_array_msgs::RobotStateArray::ConstPtr & msg);
+  void robotStateArrayCallback(const robot_array_msgs::msg::RobotStateArray::SharedPtr msg);
+
+  void robotDescriptionCallback(const std_msgs::msg::String::SharedPtr msg);
 
   void loadUrdfModel();
 
@@ -64,6 +71,8 @@ protected:
 private Q_SLOTS:
   void changedRobotDescription();
 
+  void changedRobotDescriptionTopic();
+
   void changedRobotStateTopic();
 
   void changedMaxRobotNum();
@@ -73,17 +82,21 @@ private Q_SLOTS:
   void changedColor();
 
 protected:
-  rviz::StringProperty * robot_description_property_;
-  rviz::RosTopicProperty * topic_property_;
-  rviz::IntProperty * robot_num_property_;
-  rviz::Property * robots_property_;
-  rviz::EnumProperty * color_style_property_;
+  rviz_common::properties::RosTopicProperty * robot_description_property_;
+  rviz_common::properties::RosTopicProperty * topic_property_;
+  rviz_common::properties::IntProperty * robot_num_property_;
+  rviz_common::properties::Property * robots_property_;
+  rviz_common::properties::EnumProperty * color_style_property_;
   std::vector<std::shared_ptr<ColorPropertySet>> color_property_sets_;
 
-  ros::NodeHandle nh_;
-  ros::Subscriber subscriber_;
+  rclcpp::Node::SharedPtr nh_;
+  rclcpp::Subscription<robot_array_msgs::msg::RobotStateArray>::SharedPtr robot_array_subscriber_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscriber_;
 
   std::shared_ptr<RobotStateArrayVisual> visual_;
+  
+  urdf::ModelInterfaceSharedPtr urdf_model_;
+  std::string urdf_content_;
 
   std::unordered_map<std::string, urdf::ModelInterfaceSharedPtr> urdf_model_map_;
 
