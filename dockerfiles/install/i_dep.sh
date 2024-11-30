@@ -35,4 +35,4 @@ apt-get clean -y
 
 # Install librbdyn
 curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/stable/setup.deb.sh' | sudo -E bash
-sudo apt install librbdyn-dev
+sudo apt install librbdyn-dev -y
