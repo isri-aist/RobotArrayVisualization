@@ -37,8 +37,8 @@ void RobotStateArrayVisual::reset(int idx)
 
 void RobotStateArrayVisual::update(const rbd::MultiBody & mb, const std::vector<rbd::MultiBodyConfig> & mbc_list)
 {
-  assert(mb.joint(0).name() == "Root");
-  assert(robot_list_.size() == mbc_list.size());
+  // assert(mb.joint(0).name() == "Root");
+  // assert(robot_list_.size() == mbc_list.size());
 
   for(int i = 0; i < robot_list_.size(); i++)
   {

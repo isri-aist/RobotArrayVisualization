@@ -20,5 +20,5 @@ To enter the container and build ROS2 packages, use the following command:
 
 ```bash 
 docker exec -it robot_array_visualization bash
-colcon build --merge-install --packages-select robot_array_visualization robot_array_msgs
+colcon build --merge-install --packages-select robot_array_rviz_plugins robot_array_msgs
 ```
