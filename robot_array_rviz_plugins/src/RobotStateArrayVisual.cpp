@@ -37,7 +37,8 @@ void RobotStateArrayVisual::reset(int idx)
 
 void RobotStateArrayVisual::update(const rbd::MultiBody & mb, const std::vector<rbd::MultiBodyConfig> & mbc_list)
 {
-  assert(mb.joint(0).name() == "Root");
+  // TODO: check if this line is neccessary
+  // assert(mb.joint(0).name() == "Root");
   assert(robot_list_.size() == mbc_list.size());
 
   for(int i = 0; i < robot_list_.size(); i++)
@@ -99,7 +100,7 @@ void RobotStateArrayVisual::loadRobotModel(const urdf::ModelInterface & urdf_mod
     robot->load(urdf_model, true, false);
     robot->setVisualVisible(true);
     robot->setCollisionVisible(false);
-    robot->setVisible(false);
+    robot->setVisible(true);
   }
 }
 
@@ -114,7 +115,7 @@ void RobotStateArrayVisual::loadRobotModel(int idx, const urdf::ModelInterface &
   robot->load(urdf_model, true, false);
   robot->setVisualVisible(true);
   robot->setCollisionVisible(false);
-  robot->setVisible(false);
+  robot->setVisible(true);
 }
 
 void RobotStateArrayVisual::setVisible(int num)

@@ -67,7 +67,7 @@ protected:
   void loadUrdfModel();
 
 private Q_SLOTS:
-  // void changedRobotDescription();
+  void changedRobotDescription();
 
   void changedRobotDescriptionTopic();
 

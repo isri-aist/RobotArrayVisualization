@@ -138,12 +138,16 @@ void SingleRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msg
   // get the transformation from the fixed frame to the message frame
   Ogre::Vector3 frame_pos;
   Ogre::Quaternion frame_quat;
-  context_->getFrameManager()->getTransform(first_frame_id, rclcpp::Time(0), frame_pos, frame_quat);
+
+  context_->getFrameManager()->getTransform(first_frame_id, frame_pos, frame_quat);
+
   scene_node_->setPosition(frame_pos);
   scene_node_->setOrientation(frame_quat);
 
   const auto & jointIndexByName = mb_.jointIndexByName();
-  assert(mb_.joint(0).name() == "Root");
+
+  // TODO: check if this line is neccessary
+  // assert(mb_.joint(0).name() == "Root");
 
   // update visible settings
   int prev_robot_num = robot_num_;
@@ -236,6 +240,7 @@ void SingleRobotStateArrayDisplay::loadUrdfModel()
   // load robot model into visual_
   urdf_model_ = std::move(urdf_model);
   visual_->loadRobotModel(*urdf_model_);
+  RCLCPP_INFO(nh_->get_logger(), "Loaded a urdf model from robot_description.");
 
   // load robot model into mb_ and mbc_list_
   const rbd::parsers::ParserResult & parse_res = rbd::parsers::from_urdf(urdf_content_, false);
@@ -247,13 +252,13 @@ void SingleRobotStateArrayDisplay::loadUrdfModel()
   state_updated_ = true;
 }
 
-// void SingleRobotStateArrayDisplay::changedRobotDescription()
-// {
-//   if(isEnabled())
-//   {
-//     reset();
-//   }
-// }
+void SingleRobotStateArrayDisplay::changedRobotDescription()
+{
+  if(isEnabled())
+  {
+    reset();
+  }
+}
 
 void SingleRobotStateArrayDisplay::changedRobotStateTopic()
 {
@@ -263,11 +268,11 @@ void SingleRobotStateArrayDisplay::changedRobotStateTopic()
 
   robot_num_ = 0;
   visual_->setVisible(robot_num_);
-
+  
   robot_array_subscriber_ =
     nh_->create_subscription<robot_array_msgs::msg::RobotStateArray>(
         topic_property_->getStdString(), rclcpp::QoS(10), std::bind(&SingleRobotStateArrayDisplay::robotStateArrayCallback, this, std::placeholders::_1));
-
+  RCLCPP_INFO(nh_->get_logger(), "Subscribed to %s", topic_property_->getStdString().c_str());
   state_updated_ = true;
 }
 
