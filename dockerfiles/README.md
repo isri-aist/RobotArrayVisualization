@@ -22,3 +22,8 @@ To enter the container and build ROS2 packages, use the following command:
 docker exec -it robot_array_visualization bash
 colcon build --merge-install --packages-select robot_array_rviz_plugins robot_array_msgs
 ```
+
+To publish UR5e robot description:
+```bash
+ros2 launch ur_description view_ur.launch.py ur_type:=ur5e
+```
