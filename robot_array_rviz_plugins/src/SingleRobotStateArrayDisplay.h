@@ -19,7 +19,8 @@ class BoolProperty;
 class IntProperty;
 class RosTopicProperty;
 class EnumProperty;
-}
+class FilePickerProperty;
+} // namespace properties
 } // namespace rviz
 
 namespace RobotArrayRvizPlugins
@@ -69,6 +70,10 @@ protected:
 private Q_SLOTS:
   void changedRobotDescriptionTopic();
 
+  void changedRobotDescriptionFile();
+
+  void changedRobotDescriptionSource();
+
   void changedRobotStateTopic();
 
   void changedMaxRobotNum();
@@ -79,6 +84,8 @@ private Q_SLOTS:
 
 protected:
   rviz_common::properties::RosTopicProperty * robot_description_property_;
+  rviz_common::properties::EnumProperty * robot_description_source_property_;
+  rviz_common::properties::FilePickerProperty * robot_description_file_property_;
   rviz_common::properties::RosTopicProperty * topic_property_;
   rviz_common::properties::BoolProperty * check_name_property_;
   rviz_common::properties::IntProperty * robot_num_property_;
@@ -106,4 +113,4 @@ protected:
   int robot_num_ = 0;
   int msg_num_ = 0;
 };
-} // namespace robot_array_rviz_plugins
+} // namespace RobotArrayRvizPlugins

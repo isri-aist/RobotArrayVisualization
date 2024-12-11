@@ -78,7 +78,7 @@ jobs:
           ffmpeg -y -f x11grab -s 1920x1080 -r 30 -i ${DISPLAY} -qscale 0 -vcodec huffyuv /tmp/video.avi > /dev/null 2>&1 < /dev/null &
           FFMPEG_PID=$!
           sleep 1s
-          colcon test --merge-install robot_array_rviz_plugins 
+          colcon test --merge-install --packages-select robot_array_rviz_plugins 
           sleep 30s
           kill -2 ${FFMPEG_PID}
           sleep 5s

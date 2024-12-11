@@ -8,6 +8,7 @@
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
+#include <QFile>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
 #include <rviz_common/properties/bool_property.hpp>
@@ -15,6 +16,7 @@
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
 #include <rviz_common/properties/string_property.hpp>
+#include <rviz_common/properties/file_picker_property.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_common/visualization_manager.hpp>
@@ -22,12 +24,28 @@
 
 using namespace RobotArrayRvizPlugins;
 
+enum DescriptionSource
+{
+  TOPIC_SOURCE, FILE_SOURCE
+};
+
 SingleRobotStateArrayDisplay::SingleRobotStateArrayDisplay()
 {
+  robot_description_source_property_ = new rviz_common::properties::EnumProperty(
+      "Description Source", "Topic",
+      "Source to get the robot description from.", this, SLOT(changedRobotDescriptionSource()));
+  robot_description_source_property_->addOption("Topic", DescriptionSource::TOPIC_SOURCE);
+  robot_description_source_property_->addOption("File", DescriptionSource::FILE_SOURCE);
+
   robot_description_property_ = new rviz_common::properties::RosTopicProperty(
       "Robot Description", "robot_description", rosidl_generator_traits::data_type<std_msgs::msg::String>(),
       "The name of the ROS parameter where the URDF for the robot is loaded",
       this, SLOT(changedRobotDescriptionTopic()), this);
+
+  robot_description_file_property_ = new rviz_common::properties::FilePickerProperty(
+    "Description File", "",
+    "Path to the robot description.",
+    this, SLOT(changedRobotDescriptionFile()));
 
   topic_property_ = new rviz_common::properties::RosTopicProperty(
       "Robot State Array Topic", "robot_state_arr", rosidl_generator_traits::data_type<robot_array_msgs::msg::RobotStateArray>(),
@@ -252,6 +270,47 @@ void SingleRobotStateArrayDisplay::loadUrdfModel()
 
   state_updated_ = true;
 }
+
+void SingleRobotStateArrayDisplay::changedRobotDescriptionSource()
+{
+  if (robot_description_source_property_->getOptionInt() == DescriptionSource::TOPIC_SOURCE) {
+    robot_description_file_property_->setHidden(true);
+    robot_description_property_->setHidden(false);
+    changedRobotDescriptionTopic();
+  } else if (robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE) {
+    robot_description_property_->setHidden(true);
+    robot_description_file_property_->setHidden(false);
+    robot_description_subscriber_.reset();
+    changedRobotDescriptionFile();
+  }
+}
+
+void SingleRobotStateArrayDisplay::changedRobotDescriptionFile()
+{
+  if (robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE &&
+    !robot_description_source_property_->getString().isEmpty())
+  {
+    std::string content;
+    QFile urdf_file(QString::fromStdString(robot_description_file_property_->getString().toStdString()));
+    if (urdf_file.open(QIODevice::ReadOnly)) {
+      content = urdf_file.readAll().toStdString();
+      urdf_file.close();
+    }
+    RCLCPP_INFO(nh_->get_logger(), "Loaded URDF from %s", robot_description_file_property_->getString().toStdString().c_str());
+    RCLCPP_INFO(nh_->get_logger(), "URDF content: %s", content.c_str());
+    if (content.empty()) {
+      setStatus(rviz_common::properties::StatusProperty::Error, "URDF", "URDF is empty");
+      return;
+    }
+    if (content == urdf_content_) {
+      return;
+    }
+
+    urdf_content_ = content;
+
+    loadUrdfModel();
+  }
+} 
 
 void SingleRobotStateArrayDisplay::changedRobotStateTopic()
 {

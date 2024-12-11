@@ -25,10 +25,12 @@ class TestRobotDescriptionMap(Node):
     def fr3_callback(self, msg):
         self.get_logger().info("Received fr3 robot description")
         self._fr3_msg = msg
+        self.save_file("/root/catkin_ws/fr3.urdf", msg.data)
 
     def ur5e_callback(self, msg):
         self.get_logger().info("Received ur5e robot description")
         self._ur5e_msg = msg
+        self.save_file("/root/catkin_ws/ur5e.urdf", msg.data)
 
     def run(self):
         while rclpy.ok():
@@ -62,6 +64,10 @@ class TestRobotDescriptionMap(Node):
 
         self._robot_description_map_publisher.publish(
             robot_description_map_msg)
+
+    def save_file(self, filename, content):
+        with open(filename, "w") as f:
+            f.write(content)
 
 
 def main(args=None):
