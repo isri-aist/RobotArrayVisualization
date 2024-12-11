@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/serialization.hpp>
 #include <RBDyn/MultiBodyConfig.h>
 
 #include <robot_array_msgs/msg/robot_state_array.hpp>
@@ -19,6 +20,7 @@ class StringProperty;
 class IntProperty;
 class RosTopicProperty;
 class EnumProperty;
+class FilePickerProperty;
 } 
 }// namespace rviz
 
@@ -70,9 +72,11 @@ protected:
   Ogre::ColourValue getInterpColor(double ratio, const std::vector<std::array<Ogre::Real, 4>> & hsb_list) const;
 
 private Q_SLOTS:
-  void changedRobotDescription();
-
   void changedRobotDescriptionTopic();
+
+  void changedRobotDescriptionFile();
+
+  void changedRobotDescriptionSource();
 
   void changedRobotStateTopic();
 
@@ -84,6 +88,8 @@ private Q_SLOTS:
 
 protected:
   rviz_common::properties::RosTopicProperty * robot_description_property_;
+  rviz_common::properties::EnumProperty * robot_description_source_property_;
+  rviz_common::properties::FilePickerProperty * robot_description_file_property_;
   rviz_common::properties::RosTopicProperty * topic_property_;
   rviz_common::properties::IntProperty * robot_num_property_;
   rviz_common::properties::Property * robots_property_;

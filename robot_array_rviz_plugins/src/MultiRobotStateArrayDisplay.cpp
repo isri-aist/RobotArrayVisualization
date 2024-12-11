@@ -8,12 +8,14 @@
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
+#include <QFile>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
 #include <rviz_common/properties/enum_property.hpp>
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
 #include <rviz_common/properties/string_property.hpp>
+#include <rviz_common/properties/file_picker_property.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_common/visualization_manager.hpp>
@@ -21,12 +23,28 @@
 
 using namespace RobotArrayRvizPlugins;
 
+enum DescriptionSource
+{
+  TOPIC_SOURCE, FILE_SOURCE
+};
+
 MultiRobotStateArrayDisplay::MultiRobotStateArrayDisplay()
 {
+  robot_description_source_property_ = new rviz_common::properties::EnumProperty(
+      "Description Source", "Topic",
+      "Source to get the robot description from.", this, SLOT(changedRobotDescriptionSource()));
+  robot_description_source_property_->addOption("Topic", DescriptionSource::TOPIC_SOURCE);
+  robot_description_source_property_->addOption("File", DescriptionSource::FILE_SOURCE);
+
   robot_description_property_ = new rviz_common::properties::RosTopicProperty(
       "Robot Description Map", "robot_description_map", rosidl_generator_traits::data_type<std_msgs::msg::String>(),
       "The map from the robot name to the ROS parameter name where the robot URDF model is stored", this,
       SLOT(changedRobotDescriptionTopic()), this);
+
+  robot_description_file_property_ = new rviz_common::properties::FilePickerProperty(
+    "Description File", "",
+    "Path to the robot description.",
+    this, SLOT(changedRobotDescriptionFile()));
 
   topic_property_ = new rviz_common::properties::RosTopicProperty(
       "Robot State Array Topic", "robot_state_arr", rosidl_generator_traits::data_type<robot_array_msgs::msg::RobotStateArray>(),
@@ -292,13 +310,56 @@ void MultiRobotStateArrayDisplay::loadUrdfModel()
   state_updated_ = true;
 }
 
-// void MultiRobotStateArrayDisplay::changedRobotDescription()
-// {
-//   if(isEnabled())
-//   {
-//     reset();
-//   }
-// }
+void MultiRobotStateArrayDisplay::changedRobotDescriptionSource()
+{
+  if (robot_description_source_property_->getOptionInt() == DescriptionSource::TOPIC_SOURCE) {
+    robot_description_file_property_->setHidden(true);
+    robot_description_property_->setHidden(false);
+    changedRobotDescriptionTopic();
+  } else if (robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE) {
+    robot_description_property_->setHidden(true);
+    robot_description_file_property_->setHidden(false);
+    robot_description_subscriber_.reset();
+    changedRobotDescriptionFile();
+  }
+}
+
+void MultiRobotStateArrayDisplay::changedRobotDescriptionFile()
+{
+  if (robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE &&
+    !robot_description_source_property_->getString().isEmpty())
+  {
+    rclcpp::Serialization<robot_array_msgs::msg::RobotDescriptionArray> serializer;
+    rclcpp::SerializedMessage serialized_msg;
+    auto msg = std::make_shared<robot_array_msgs::msg::RobotDescriptionArray>();
+    QFile message_file(QString::fromStdString(robot_description_file_property_->getString().toStdString()));
+    if (message_file.open(QIODevice::ReadOnly)) {
+        QByteArray file_data = message_file.readAll();
+        message_file.close();
+        if (file_data.isEmpty()) {
+            setStatus(rviz_common::properties::StatusProperty::Error, "Message", "Message is empty");
+            return;
+        }
+        serialized_msg.reserve(file_data.size());
+        std::memcpy(serialized_msg.get_rcl_serialized_message().buffer, file_data.data(), file_data.size());
+        serialized_msg.get_rcl_serialized_message().buffer_length = file_data.size();
+        try {
+            serializer.deserialize_message(&serialized_msg, msg.get());
+        } catch (const std::exception &e) {
+            setStatus(rviz_common::properties::StatusProperty::Error, "Message", 
+                      "Failed to deserialize message.");
+            return;
+        }
+    }
+    if (robot_description_array_ && *msg == *robot_description_array_) {
+        return;
+    }
+
+    robot_description_array_ = msg;
+
+    loadUrdfModel();
+  }
+} 
 
 void MultiRobotStateArrayDisplay::changedRobotStateTopic()
 {
