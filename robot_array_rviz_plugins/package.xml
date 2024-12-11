@@ -22,8 +22,7 @@
   <depend>eigen</depend>
   <depend>qtbase5-dev</depend>
 
-  <test_depend>rosunit</test_depend>
-  <test_depend>rostest</test_depend>
+  <test_depend>ros_testing</test_depend>
   <test_depend>franka_description</test_depend>
   <test_depend>ur_description</test_depend>
 

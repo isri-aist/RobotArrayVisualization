@@ -1,57 +1,80 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 import sys
-import unittest
-import json
 import rclpy
+from rclpy.node import Node
 from std_msgs.msg import String
-from message_filters import Subscriber, ApproximateTimeSynchronizer
+from robot_array_msgs.msg import RobotDescription, RobotDescriptionArray
 
 
-class TestRobotDescriptionMap(unittest.TestCase):
-    def __init__(self, *args):
-        super().__init__(*args)
+class TestRobotDescriptionMap(Node):
+    def __init__(self):
+        super().__init__("test_robot_description_map")
 
-    def test(self):
-        rclpy.init(args=sys.argv)
-        node = rclpy.create_node("test_robot_description_map")
+        _ = self.create_subscription(
+            String, "/fr3/robot_description", self.fr3_callback, 10)
 
-        self._fr3_subscriber = Subscriber(
-            node, String, "/fr3/robot_description")
+        _ = self.create_subscription(
+            String, "/ur5e/robot_description", self.ur5e_callback, 10)
 
-        self._ur5e_subscriber = Subscriber(
-            node, String, "/ur5e/robot_description")
+        self._robot_description_map_publisher = self.create_publisher(
+            RobotDescriptionArray, "robot_description_map", 1)
 
-        self._msg_synchronizer = ApproximateTimeSynchronizer(
-            [self._fr3_subscriber, self._ur5e_subscriber, 10, 0.001])
+        self._fr3_msg, self._ur5e_msg = None, None
 
-        self._robot_description_map_publisher = node.create_publisher(
-            String, "robot_description_map", 1)
+    def fr3_callback(self, msg):
+        self.get_logger().info("Received fr3 robot description")
+        self._fr3_msg = msg
 
-        self._msg_synchronizer.registerCallback(self.callback)
+    def ur5e_callback(self, msg):
+        self.get_logger().info("Received ur5e robot description")
+        self._ur5e_msg = msg
 
-        rclpy.spin(node)
+    def run(self):
+        while rclpy.ok():
+            rclpy.spin_once(self)
+            if self._fr3_msg is None or self._ur5e_msg is None:
+                continue
 
-        node.destroy_node()
+            self.publish_robot_description_map(
+                self._fr3_msg, self._ur5e_msg)
 
-        rclpy.shutdown()
+            break
 
-    def callback(self, fr3_msg, ur5e_msg):
-        print("fr3: ", fr3_msg.data)
-        print("ur5e: ", ur5e_msg.data)
+    def publish_robot_description_map(self, fr3_msg, ur5e_msg):
+        self.get_logger().info("Publishing robot description map")
+        robot_description_map_msg = RobotDescriptionArray()
 
-        robot_description_map_msg = String()
+        fr3_description = RobotDescription()
 
-        robot_description_map = {
-            "fr3": fr3_msg.data,
-            "ur5e": ur5e_msg.data
-        }
+        fr3_description.name = "fr3"
 
-        robot_description_map_msg.data = json.dumps(robot_description_map)
+        fr3_description.urdf_content = fr3_msg.data
+
+        ur5e_description = RobotDescription()
+
+        ur5e_description.name = "ur5e"
+
+        ur5e_description.urdf_content = ur5e_msg.data
+
+        robot_description_map_msg.robot_descriptions = [
+            fr3_description, ur5e_description]
 
         self._robot_description_map_publisher.publish(
             robot_description_map_msg)
 
 
+def main(args=None):
+    rclpy.init(args=args)
+
+    test_robot_description_map = TestRobotDescriptionMap()
+
+    test_robot_description_map.run()
+
+    test_robot_description_map.destroy_node()
+
+    rclpy.shutdown()
+
+
 if __name__ == "__main__":
-    unittest.main()
+    main(sys.argv)

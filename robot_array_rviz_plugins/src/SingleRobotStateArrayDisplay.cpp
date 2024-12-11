@@ -212,7 +212,7 @@ void SingleRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msg
 
 void SingleRobotStateArrayDisplay::robotDescriptionCallback(const std_msgs::msg::String::SharedPtr msg)
 {
-  RCLCPP_INFO(nh_->get_logger(), "Received a robot description message. %s", msg->data.c_str());
+  RCLCPP_INFO(nh_->get_logger(), "Received a robot description message. ");
 
   urdf_content_ = msg->data;
 

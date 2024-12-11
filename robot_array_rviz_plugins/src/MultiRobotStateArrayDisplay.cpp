@@ -112,6 +112,7 @@ void MultiRobotStateArrayDisplay::onEnable()
     loadUrdfModel();
     robot_inited_ = true;
   }
+  changedRobotDescriptionTopic();
   changedRobotStateTopic();
   changedColorStyle();
 }
@@ -179,7 +180,7 @@ void MultiRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msgs
   // get the transformation from the fixed frame to the message frame
   Ogre::Vector3 frame_pos;
   Ogre::Quaternion frame_quat;
-  context_->getFrameManager()->getTransform(first_frame_id, rclcpp::Time(0), frame_pos, frame_quat);
+  context_->getFrameManager()->getTransform(first_frame_id, frame_pos, frame_quat);
   scene_node_->setPosition(frame_pos);
   scene_node_->setOrientation(frame_quat);
 
@@ -268,6 +269,7 @@ void MultiRobotStateArrayDisplay::loadUrdfModel()
   for(auto & robot_description : robot_description_array_->robot_descriptions)
   {
     const std::string & robot_name = robot_description.name;
+    RCLCPP_INFO(nh_->get_logger(), "Loading URDF model for robot: {%s}", robot_name.c_str());
     const std::string & urdf_content = robot_description.urdf_content;
 
     // set URDF model
@@ -320,7 +322,7 @@ void MultiRobotStateArrayDisplay::changedRobotDescriptionTopic()
 {
   robot_description_subscriber_.reset();
 
-  setStatus(rviz_common::properties::StatusProperty::Warn, "SingleRobotStateArrayDisplay", "No message received");
+  setStatus(rviz_common::properties::StatusProperty::Warn, "MultiRobotStateArrayDisplay", "No message received");
 
   robot_description_subscriber_ =
     nh_->create_subscription<robot_array_msgs::msg::RobotDescriptionArray>(

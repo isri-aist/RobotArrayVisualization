@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 import sys
 import unittest
@@ -6,6 +6,63 @@ import copy
 import numpy as np
 import rclpy
 from robot_array_msgs.msg import RobotState, RobotStateArray
+
+import os
+import pytest
+import launch
+import launch.actions
+import launch_testing
+import launch_testing.actions
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+
+@pytest.mark.launch_test
+def generate_test_description():
+    robot_array_rviz_plugins_package = FindPackageShare(
+            package="robot_array_rviz_plugins").find(
+            "robot_array_rviz_plugins")
+
+    fr3_launch_file = os.path.join(
+        robot_array_rviz_plugins_package,
+        "tests",
+        "launch",
+        "fr3_description.launch.py")
+
+    fr3_launch = launch.actions.IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(fr3_launch_file),
+        launch_arguments={
+            "arm_id": "fr3",
+            "load_gripper": "false"
+        }.items(),
+    )
+
+    rviz_config_file = os.path.join(
+        robot_array_rviz_plugins_package,
+        "tests",
+        "rviz",
+        "TestSingleRobotStateArrayDisplay.rviz"
+    )
+
+    rviz2_node = Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        arguments=["-d", rviz_config_file],
+    )
+
+    context = {}
+
+    return launch.LaunchDescription([
+        rviz2_node,
+        launch.actions.TimerAction(
+            period=5.0, actions=[fr3_launch],
+        ),
+        launch.actions.TimerAction(
+            period=10.0, actions=[launch_testing.actions.ReadyToTest()],
+        ),
+    ]), context
 
 
 class TestSingleRobotStateArrayClient(unittest.TestCase):
@@ -72,7 +129,3 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
 
 def rosnode_ping(node_name, max_count):
     return True
-
-
-if __name__ == "__main__":
-    unittest.main()

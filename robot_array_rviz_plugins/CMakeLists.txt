@@ -21,6 +21,7 @@ find_package(rviz2 REQUIRED)
 find_package(rviz_common REQUIRED)
 find_package(rviz_default_plugins REQUIRED)
 find_package(robot_array_msgs REQUIRED)
+find_package(launch_testing_ament_cmake)
 
 ament_export_dependencies(class_loader REQUIRED)
 ament_export_dependencies(pluginlib REQUIRED)
@@ -57,14 +58,7 @@ set(SOURCE_FILES
   src/MultiRobotStateArrayDisplay.cpp
 )
 
-set(HEADERS
-  src/ColorPropertySet.h
-  src/RobotStateArrayVisual.h
-  src/SingleRobotStateArrayDisplay.h
-  src/MultiRobotStateArrayDisplay.h
-)
-
-add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADERS})
+add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES})
 ament_target_dependencies(${PROJECT_NAME}
   std_msgs
   rviz2
@@ -87,7 +81,24 @@ install(TARGETS ${PROJECT_NAME}
   EXPORT ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
+  RUNTIME DESTINATION bin
+)
+
+###########
+#  Test   #
+###########
+if(BUILD_TESTING)
+  add_launch_test(
+    tests/scripts/testSingleRobotStateArrayClient.py
+  )
+  
+  install(PROGRAMS tests/scripts/testRobotDescriptionMap.py
+    DESTINATION lib/${PROJECT_NAME})
+
+  install(DIRECTORY tests DESTINATION 
+    DESTINATION share/${PROJECT_NAME})
+    
+endif()
 
 # plugin export #
 pluginlib_export_plugin_description_file(rviz_common plugin_description.xml)
