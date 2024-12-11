@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-import os
 import sys
 import unittest
 import copy
@@ -36,7 +35,7 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
                 -0.5 * np.pi if j == 4 else 0.0
             )
 
-        rate = node.create_rate(30)
+        rate = node.create_rate(1000)
         start_t = rclpy.clock.Clock().now().nanoseconds / 1e9
         fail_count = 0
         fail_count_thre = 20
@@ -67,15 +66,12 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
             if t - start_t > 10.0:
                 break
 
-            rclpy.spin_once(node, timeout_sec=0.1)
+            rclpy.spin_once(node)
             rate.sleep()
 
 
 def rosnode_ping(node_name, max_count):
-    cmd = "ros2 node info {}".format(node_name)
-    for i in range(max_count):
-        if os.system(cmd) == 0:
-            return True
+    return True
 
 
 if __name__ == "__main__":

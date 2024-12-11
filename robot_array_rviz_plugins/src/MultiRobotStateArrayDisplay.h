@@ -97,7 +97,7 @@ protected:
   std::shared_ptr<RobotStateArrayVisual> visual_;
 
   std::unordered_map<std::string, urdf::ModelInterfaceSharedPtr> urdf_model_map_;
-  robot_array_msgs::msg::RobotDescriptionArray::SharedPtr robot_description_array_;
+  std::shared_ptr<robot_array_msgs::msg::RobotDescriptionArray> robot_description_array_;
 
   std::unordered_map<std::string, rbd::MultiBody> mb_map_;
   std::unordered_map<std::string, rbd::MultiBodyConfig> mbc_map_;

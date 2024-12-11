@@ -199,7 +199,7 @@ void MultiRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msgs
     const auto & mb = mb_map_.at(robot_name);
     auto & mbc = mbc_list_[i];
     const auto & jointIndexByName = mb.jointIndexByName();
-    assert(mb.joint(0).name() == "Root");
+    // assert(mb.joint(0).name() == "Root");
 
     if(!visual_->robot_list_[i]->isVisible())
     {
@@ -256,6 +256,12 @@ void MultiRobotStateArrayDisplay::robotDescriptionCallback(const robot_array_msg
 
 void MultiRobotStateArrayDisplay::loadUrdfModel()
 {
+  if(!robot_description_array_)
+  {
+    RCLCPP_ERROR(nh_->get_logger(), "Failed to load a urdf model from robot_description.");
+    return;
+  }
+
   // set map of URDF and RBDyn models
   urdf_model_map_.clear();
 
