@@ -109,6 +109,7 @@ void SingleRobotStateArrayDisplay::onEnable()
   Display::onEnable();
   if(!robot_inited_)
   {
+    loadUrdfModel();
     robot_inited_ = true;
   }
   changedRobotDescriptionTopic();
@@ -138,15 +139,12 @@ void SingleRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msg
   // get the transformation from the fixed frame to the message frame
   Ogre::Vector3 frame_pos;
   Ogre::Quaternion frame_quat;
-
   context_->getFrameManager()->getTransform(first_frame_id, frame_pos, frame_quat);
 
   scene_node_->setPosition(frame_pos);
   scene_node_->setOrientation(frame_quat);
 
   const auto & jointIndexByName = mb_.jointIndexByName();
-
-  // TODO: check if this line is neccessary
   // assert(mb_.joint(0).name() == "Root");
 
   // update visible settings
@@ -223,6 +221,12 @@ void SingleRobotStateArrayDisplay::robotDescriptionCallback(const std_msgs::msg:
 
 void SingleRobotStateArrayDisplay::loadUrdfModel()
 {
+  if (urdf_content_.empty())
+  {
+    RCLCPP_ERROR(nh_->get_logger(), "Failed to load a urdf model from robot_description.");
+    return;
+  }
+
   // set urdf_model
   std::unique_ptr<urdf::Model> urdf_model(new urdf::Model());
 
@@ -273,6 +277,7 @@ void SingleRobotStateArrayDisplay::changedRobotStateTopic()
     nh_->create_subscription<robot_array_msgs::msg::RobotStateArray>(
         topic_property_->getStdString(), rclcpp::QoS(10), std::bind(&SingleRobotStateArrayDisplay::robotStateArrayCallback, this, std::placeholders::_1));
   RCLCPP_INFO(nh_->get_logger(), "Subscribed to %s", topic_property_->getStdString().c_str());
+
   state_updated_ = true;
 }
 
