@@ -120,7 +120,6 @@ void RobotStateArrayVisual::loadRobotModel(int idx, const urdf::ModelInterface &
 
 void RobotStateArrayVisual::setVisible(int num)
 {
-  std::cout << "setVisible: " << num << std::endl;
   for(int i = 0; i < robot_list_.size(); i++)
   {
     rviz_common::properties::BoolProperty * robot_property = robot_property_list_[i];

@@ -35,7 +35,7 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
                 -0.5 * np.pi if j == 4 else 0.0
             )
 
-        rate = node.create_rate(10)
+        rate = node.create_rate(30)
         start_t = rclpy.clock.Clock().now().nanoseconds / 1e9
         fail_count = 0
         fail_count_thre = 20
@@ -66,6 +66,7 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
             if t - start_t > 10.0:
                 break
 
+            rclpy.spin_once(node, timeout_sec=0.1)
             rate.sleep()
 
 
