@@ -212,8 +212,6 @@ void SingleRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msg
 
 void SingleRobotStateArrayDisplay::robotDescriptionCallback(const std_msgs::msg::String::SharedPtr msg)
 {
-  RCLCPP_INFO(nh_->get_logger(), "Received a robot description message. ");
-
   urdf_content_ = msg->data;
 
   loadUrdfModel();
@@ -244,7 +242,6 @@ void SingleRobotStateArrayDisplay::loadUrdfModel()
   // load robot model into visual_
   urdf_model_ = std::move(urdf_model);
   visual_->loadRobotModel(*urdf_model_);
-  RCLCPP_INFO(nh_->get_logger(), "Loaded a urdf model from robot_description.");
 
   // load robot model into mb_ and mbc_list_
   const rbd::parsers::ParserResult & parse_res = rbd::parsers::from_urdf(urdf_content_, false);
@@ -254,14 +251,6 @@ void SingleRobotStateArrayDisplay::loadUrdfModel()
   mbc_list_.resize(max_robot_num, parse_res.mbc);
 
   state_updated_ = true;
-}
-
-void SingleRobotStateArrayDisplay::changedRobotDescription()
-{
-  if(isEnabled())
-  {
-    reset();
-  }
 }
 
 void SingleRobotStateArrayDisplay::changedRobotStateTopic()
@@ -276,7 +265,6 @@ void SingleRobotStateArrayDisplay::changedRobotStateTopic()
   robot_array_subscriber_ =
     nh_->create_subscription<robot_array_msgs::msg::RobotStateArray>(
         topic_property_->getStdString(), rclcpp::QoS(10), std::bind(&SingleRobotStateArrayDisplay::robotStateArrayCallback, this, std::placeholders::_1));
-  RCLCPP_INFO(nh_->get_logger(), "Subscribed to %s", topic_property_->getStdString().c_str());
 
   state_updated_ = true;
 }
@@ -290,8 +278,6 @@ void SingleRobotStateArrayDisplay::changedRobotDescriptionTopic()
   robot_description_subscriber_ =
     nh_->create_subscription<std_msgs::msg::String>(
         robot_description_property_->getStdString(), rclcpp::QoS(10), std::bind(&SingleRobotStateArrayDisplay::robotDescriptionCallback, this, std::placeholders::_1));
-
-  RCLCPP_INFO(nh_->get_logger(), "Subscribed to %s", robot_description_property_->getStdString().c_str());
 }
 
 void SingleRobotStateArrayDisplay::changedMaxRobotNum()

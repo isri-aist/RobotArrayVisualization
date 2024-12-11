@@ -1,8 +1,18 @@
-find_package(rostest REQUIRED)
+find_package(launch_testing_ament_cmake)
 
-set(RobotArrayRvizPlugins_rostest_list TestSingleRobotStateArrayDisplay
-                                       TestMultiRobotStateArrayDisplay)
+add_launch_test(
+  scripts/testSingleRobotStateArrayClient.py
+)
 
-foreach(NAME IN LISTS RobotArrayRvizPlugins_rostest_list)
-  add_rostest(test/${NAME}.test)
-endforeach()
+add_launch_test(
+  scripts/testMultiRobotStateArrayClient.py
+)
+
+install(PROGRAMS scripts/testRobotDescriptionMap.py
+  DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY 
+  launch
+  rviz
+  scripts 
+  DESTINATION share/${PROJECT_NAME}/tests)

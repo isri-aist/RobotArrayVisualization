@@ -83,7 +83,7 @@ def generate_test_description():
     context = {}
 
     return launch.LaunchDescription([
-        # rviz2_node,
+        rviz2_node,
         launch.actions.TimerAction(
             period=5.0, actions=[description_node],
         ),

@@ -58,7 +58,7 @@ class TestRobotDescriptionMap(Node):
         ur5e_description.urdf_content = ur5e_msg.data
 
         robot_description_map_msg.robot_descriptions = [
-            fr3_description, ur5e_description]
+            ur5e_description, fr3_description]
 
         self._robot_description_map_publisher.publish(
             robot_description_map_msg)

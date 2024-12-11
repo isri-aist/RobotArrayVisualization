@@ -69,4 +69,25 @@ jobs:
           build-type: ${{ matrix.build-type }}
           colcon-test-args: --no-deps
           build-packages: robot_array_rviz_plugins robot_array_msgs
-          skip-test: true
+          test-packages: robot_array_rviz_plugins
+      - name: Record video
+        if: env.RUN_RECORDING_STEPS == 'true'
+        run: |
+          . ${GITHUB_WORKSPACE}/colcon_ws/install/setup.bash
+          set -e
+          set -x
+          ffmpeg -y -f x11grab -s 1920x1080 -r 30 -i ${DISPLAY} -qscale 0 -vcodec huffyuv /tmp/video.avi > /dev/null 2>&1 < /dev/null &
+          FFMPEG_PID=$!
+          sleep 1s
+          colcon test --merge-install robot_array_rviz_plugins 
+          sleep 30s
+          kill -2 ${FFMPEG_PID}
+          sleep 5s
+          mkdir -p /tmp/results
+          ffmpeg -nostats -i /tmp/video.avi /tmp/results/RARP-video-${{ matrix.test-name }}.mp4
+      - name: Upload video
+        if: env.RUN_RECORDING_STEPS == 'true'
+        uses: actions/upload-artifact@v3
+        with:
+          name: RARP-ci-results
+          path: /tmp/results

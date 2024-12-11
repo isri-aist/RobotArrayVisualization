@@ -247,9 +247,7 @@ void MultiRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msgs
 }
 
 void MultiRobotStateArrayDisplay::robotDescriptionCallback(const robot_array_msgs::msg::RobotDescriptionArray::SharedPtr msg)
-{
-  RCLCPP_INFO(nh_->get_logger(), "Received a robot description message.");
-
+{ 
   robot_description_array_ = msg;
 
   loadUrdfModel();
@@ -269,7 +267,6 @@ void MultiRobotStateArrayDisplay::loadUrdfModel()
   for(auto & robot_description : robot_description_array_->robot_descriptions)
   {
     const std::string & robot_name = robot_description.name;
-    RCLCPP_INFO(nh_->get_logger(), "Loading URDF model for robot: {%s}", robot_name.c_str());
     const std::string & urdf_content = robot_description.urdf_content;
 
     // set URDF model
@@ -327,8 +324,6 @@ void MultiRobotStateArrayDisplay::changedRobotDescriptionTopic()
   robot_description_subscriber_ =
     nh_->create_subscription<robot_array_msgs::msg::RobotDescriptionArray>(
         robot_description_property_->getStdString(), rclcpp::QoS(10), std::bind(&MultiRobotStateArrayDisplay::robotDescriptionCallback, this, std::placeholders::_1));
-
-  RCLCPP_INFO(nh_->get_logger(), "Subscribed to %s", robot_description_property_->getStdString().c_str());
 }
 
 void MultiRobotStateArrayDisplay::changedMaxRobotNum()
