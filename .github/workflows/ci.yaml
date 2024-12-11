@@ -67,7 +67,6 @@ jobs:
         uses: jrl-umi3218/github-actions/build-colcon-project@master
         with:
           build-type: ${{ matrix.build-type }}
-          colcon-test-args: --no-deps
           build-packages: robot_array_rviz_plugins robot_array_msgs
           test-packages: robot_array_rviz_plugins
       - name: Record video
