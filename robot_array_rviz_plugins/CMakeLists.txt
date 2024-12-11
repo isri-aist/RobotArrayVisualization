@@ -54,12 +54,14 @@ set(SOURCE_FILES
   src/ColorPropertySet.cpp
   src/RobotStateArrayVisual.cpp
   src/SingleRobotStateArrayDisplay.cpp
+  src/MultiRobotStateArrayDisplay.cpp
 )
 
 set(HEADERS
   src/ColorPropertySet.h
   src/RobotStateArrayVisual.h
   src/SingleRobotStateArrayDisplay.h
+  src/MultiRobotStateArrayDisplay.h
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${HEADERS})

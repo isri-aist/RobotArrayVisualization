@@ -4,6 +4,7 @@
 #include <RBDyn/MultiBodyConfig.h>
 
 #include <robot_array_msgs/msg/robot_state_array.hpp>
+#include <robot_array_msgs/msg/robot_description_array.hpp>
 
 #include <OgreColourValue.h>
 #include <std_msgs/msg/string.hpp>
@@ -60,7 +61,7 @@ protected:
 
   void robotStateArrayCallback(const robot_array_msgs::msg::RobotStateArray::SharedPtr msg);
 
-  void robotDescriptionCallback(const std_msgs::msg::String::SharedPtr msg);
+  void robotDescriptionCallback(const robot_array_msgs::msg::RobotDescriptionArray::SharedPtr msg);
 
   void loadUrdfModel();
 
@@ -91,14 +92,12 @@ protected:
 
   rclcpp::Node::SharedPtr nh_;
   rclcpp::Subscription<robot_array_msgs::msg::RobotStateArray>::SharedPtr robot_array_subscriber_;
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscriber_;
+  rclcpp::Subscription<robot_array_msgs::msg::RobotDescriptionArray>::SharedPtr robot_description_subscriber_;
 
   std::shared_ptr<RobotStateArrayVisual> visual_;
-  
-  urdf::ModelInterfaceSharedPtr urdf_model_;
-  std::string urdf_content_;
 
   std::unordered_map<std::string, urdf::ModelInterfaceSharedPtr> urdf_model_map_;
+  robot_array_msgs::msg::RobotDescriptionArray::SharedPtr robot_description_array_;
 
   std::unordered_map<std::string, rbd::MultiBody> mb_map_;
   std::unordered_map<std::string, rbd::MultiBodyConfig> mbc_map_;

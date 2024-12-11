@@ -30,7 +30,8 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
         default_robot_state_msg.root_pose.pose.orientation.z = 0.0
         default_robot_state_msg.root_pose.pose.orientation.w = 1.0
         for j in range(1, 8):
-            default_robot_state_msg.joint_name_list.append("fr3_joint{}".format(j))
+            default_robot_state_msg.joint_name_list.append(
+                "fr3_joint{}".format(j))
             default_robot_state_msg.joint_pos_list.append(
                 -0.5 * np.pi if j == 4 else 0.0
             )

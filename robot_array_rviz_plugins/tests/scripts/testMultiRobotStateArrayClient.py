@@ -1,12 +1,11 @@
 #! /usr/bin/env python
 
+import os
 import sys
 import unittest
 import copy
 import numpy as np
-import rospy
-import rostest
-import rosnode
+import rclpy
 from geometry_msgs.msg import PoseStamped
 from robot_array_msgs.msg import RobotState, RobotStateArray
 
@@ -16,9 +15,10 @@ class TestMultiRobotStateArrayClient(unittest.TestCase):
         super().__init__(*args)
 
     def test(self):
-        rospy.init_node("client")
+        rclpy.init(args=sys.argv)
+        node = rclpy.create_node("client")
 
-        pub = rospy.Publisher("robot_state_arr", RobotStateArray, queue_size=1)
+        pub = node.create_publisher(RobotStateArray, "robot_state_arr", 1)
 
         default_pose_st_msg = PoseStamped()
         default_pose_st_msg.header.frame_id = "map"
@@ -31,9 +31,9 @@ class TestMultiRobotStateArrayClient(unittest.TestCase):
         default_pose_st_msg.pose.orientation.w = 1.0
 
         default_robot_state_msg_panda = RobotState()
-        default_robot_state_msg_panda.name = "panda"
+        default_robot_state_msg_panda.name = "fr3"
         default_robot_state_msg_panda.root_pose = default_pose_st_msg
-        panda_joint_name_list = ["panda_joint{}".format(i) for i in range(1, 8)]
+        panda_joint_name_list = ["fr3_joint{}".format(i) for i in range(1, 8)]
         panda_joint_pos_list = [0.0, 0.0, 0.0, -0.5 * np.pi, 0.0, 0.0, 0.0]
         for jname, jpos in zip(panda_joint_name_list, panda_joint_pos_list):
             default_robot_state_msg_panda.joint_name_list.append(jname)
@@ -55,12 +55,12 @@ class TestMultiRobotStateArrayClient(unittest.TestCase):
             default_robot_state_msg_ur5e.joint_name_list.append(jname)
             default_robot_state_msg_ur5e.joint_pos_list.append(jpos)
 
-        rate = rospy.Rate(30)
-        start_t = rospy.get_time()
+        rate = node.create_rate(30)
+        start_t = rclpy.clock.Clock().now().nanoseconds / 1e9
         fail_count = 0
         fail_count_thre = 20
-        while not rospy.is_shutdown():
-            t = rospy.get_time()
+        while rclpy.ok():
+            t = rclpy.clock.Clock().now().nanoseconds / 1e9
 
             robot_state_arr_msg = RobotStateArray()
 
@@ -89,24 +89,28 @@ class TestMultiRobotStateArrayClient(unittest.TestCase):
 
             pub.publish(robot_state_arr_msg)
 
-            if rosnode.rosnode_ping("rviz", max_count=1):
+            if rosnode_ping("rviz2", max_count=1):
                 fail_count = 0
             else:
                 fail_count += 1
             if fail_count >= fail_count_thre:
-                rospy.logerr("Ping to rviz failed")
+                node.get_logger().error("rviz is not launched")
                 sys.exit(1)
 
             if t - start_t > 10.0:
                 break
 
+            rclpy.spin_once(node, timeout_sec=0.1)
             rate.sleep()
 
 
+def rosnode_ping(node_name, max_count):
+    cmd = "ros2 node info {}".format(node_name)
+    for i in range(max_count):
+        if os.system(cmd) == 0:
+            return True
+
+
 if __name__ == "__main__":
-    rostest.rosrun(
-        "robot_array_rviz_plugins",
-        "TestMultiRobotStateArrayDisplay",
-        TestMultiRobotStateArrayClient,
-        sys.argv,
-    )
+    unittest.main()
+

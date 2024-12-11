@@ -245,46 +245,28 @@ void MultiRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msgs
   state_updated_ = true;
 }
 
-void MultiRobotStateArrayDisplay::robotDescriptionCallback(const std_msgs::msg::String::SharedPtr msg)
+void MultiRobotStateArrayDisplay::robotDescriptionCallback(const robot_array_msgs::msg::RobotDescriptionArray::SharedPtr msg)
 {
-  RCLCPP_INFO(nh_->get_logger(), "Received a robot description message. %s", msg->data.c_str());
+  RCLCPP_INFO(nh_->get_logger(), "Received a robot description message.");
 
-  urdf_content_ = msg->data;
+  robot_description_array_ = msg;
 
   loadUrdfModel();
 }
 
 void MultiRobotStateArrayDisplay::loadUrdfModel()
 {
-  // get ROS parameter of map
-  // std::string map_param_name = robot_description_property_->getStdString();
-  // XmlRpc::XmlRpcValue urdf_model_map_raw;
-  // if(!nh_.getParam(map_param_name, urdf_model_map_raw))
-  // {
-  //   ROS_ERROR_STREAM("Failed to load robot_description_map. (param_name: " << map_param_name << ")");
-  //   return;
-  // }
-
   // set map of URDF and RBDyn models
   urdf_model_map_.clear();
-  std::vector<std::string> robot_names = {"robot"};
-  for (auto robot_name : robot_names)
+
+  for(auto & robot_description : robot_description_array_->robot_descriptions)
   {
-  // for(const auto & urdf_model_kv : urdf_model_map_raw)
-  // {
-    // get ROS parameter of URDF
-    // const std::string & robot_name = urdf_model_kv.first;
-    // const std::string & urdf_param_name = urdf_model_kv.second;
-    // std::string urdf_content;
-    // if(!nh_.getParam(urdf_param_name, urdf_content))
-    // {
-    //   ROS_ERROR_STREAM("Failed to load robot_description. (param_name: " << urdf_param_name << ")");
-    //   return;
-    // }
+    const std::string & robot_name = robot_description.name;
+    const std::string & urdf_content = robot_description.urdf_content;
 
     // set URDF model
     std::unique_ptr<urdf::Model> urdf_model(new urdf::Model());
-    if(!urdf_model->initString(urdf_content_))
+    if(!urdf_model->initString(urdf_content))
     {
       RCLCPP_ERROR(nh_->get_logger(), "Failed to init a urdf model from robot_description. (robot_name: %s)", robot_name.c_str());
       continue;
@@ -292,7 +274,7 @@ void MultiRobotStateArrayDisplay::loadUrdfModel()
     urdf_model_map_.emplace(robot_name, std::move(urdf_model));
 
     // set RBDyn model
-    rbd::parsers::ParserResult parse_res = rbd::parsers::from_urdf(urdf_content_, false);
+    rbd::parsers::ParserResult parse_res = rbd::parsers::from_urdf(urdf_content, false);
     mb_map_.emplace(robot_name, parse_res.mb);
     // parse_res.mbc is initialized by the forward kinematics calculation with the zero positions
     mbc_map_.emplace(robot_name, parse_res.mbc);
@@ -335,7 +317,7 @@ void MultiRobotStateArrayDisplay::changedRobotDescriptionTopic()
   setStatus(rviz_common::properties::StatusProperty::Warn, "SingleRobotStateArrayDisplay", "No message received");
 
   robot_description_subscriber_ =
-    nh_->create_subscription<std_msgs::msg::String>(
+    nh_->create_subscription<robot_array_msgs::msg::RobotDescriptionArray>(
         robot_description_property_->getStdString(), rclcpp::QoS(10), std::bind(&MultiRobotStateArrayDisplay::robotDescriptionCallback, this, std::placeholders::_1));
 
   RCLCPP_INFO(nh_->get_logger(), "Subscribed to %s", robot_description_property_->getStdString().c_str());
