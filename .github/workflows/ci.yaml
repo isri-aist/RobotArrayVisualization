@@ -72,8 +72,11 @@ jobs:
       - name: Record video
         if: env.RUN_RECORDING_STEPS == 'true'
         run: |
-          source ${GITHUB_WORKSPACE}/colcon_ws/install/setup.bash
           set -e
+          set -x
+          cd ${GITHUB_WORKSPACE}/colcon_ws
+          set +x
+          . install/setup.bash
           set -x
           ffmpeg -y -f x11grab -s 1920x1080 -r 30 -i ${DISPLAY} -qscale 0 -vcodec huffyuv /tmp/video.avi > /dev/null 2>&1 < /dev/null &
           FFMPEG_PID=$!
