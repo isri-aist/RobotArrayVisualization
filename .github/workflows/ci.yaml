@@ -83,9 +83,9 @@ jobs:
           sleep 1s
           if [ "${{ matrix.test-name }}" == "TestSingleRobotStateArrayDisplay" ]
           then
-            launch_test src/RobotArrayVisualization/robot_array_rviz_plugins/tests/scripts/testSingleRobotStateArrayClient.py
+            launch_test install/share/robot_array_rviz_plugins/tests/scripts/testSingleRobotStateArrayClient.py
           else
-            launch_test src/RobotArrayVisualization/robot_array_rviz_plugins/tests/scripts/testMultiRobotStateArrayClient.py
+            launch_test install/share/robot_array_rviz_plugins/tests/scripts/testMultiRobotStateArrayClient.py
           fi
           sleep 30s
           kill -2 ${FFMPEG_PID}
