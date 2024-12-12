@@ -130,7 +130,7 @@ void SingleRobotStateArrayDisplay::onEnable()
     loadUrdfModel();
     robot_inited_ = true;
   }
-  changedRobotDescriptionTopic();
+  changedRobotDescriptionSource();
   changedRobotStateTopic();
   changedColorStyle();
 }
