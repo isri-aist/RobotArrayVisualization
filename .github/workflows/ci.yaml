@@ -82,6 +82,7 @@ jobs:
           FFMPEG_PID=$!
           sleep 1s
           if [ "${{ matrix.test-name }}" == "TestSingleRobotStateArrayDisplay" ]
+          then
             launch_testing src/robot_array_rviz_plugins/tests/scripts/testSingleRobotStateArrayClient.py
           else
             launch_testing src/robot_array_rviz_plugins/tests/scripts/testMultiRobotStateArrayClient.py
