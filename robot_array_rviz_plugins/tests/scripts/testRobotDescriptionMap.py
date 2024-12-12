@@ -1,10 +1,10 @@
 #! /usr/bin/env python3
 
-import os
+# import os
 import sys
 import rclpy
 from rclpy.node import Node
-from rclpy.serialization import serialize_message
+# from rclpy.serialization import serialize_message
 from std_msgs.msg import String
 from robot_array_msgs.msg import RobotDescription, RobotDescriptionArray
 
@@ -30,12 +30,14 @@ class TestRobotDescriptionMap(Node):
     def fr3_callback(self, msg):
         self.get_logger().info("Received fr3 robot description")
         self._fr3_msg = msg
-        self.save_file(os.path.join(self._root_folder, "fr3.urdf"), msg.data)
+        # self.save_file(
+        # os.path.join(self._root_folder, "fr3.urdf"), msg.data)
 
     def ur5e_callback(self, msg):
         self.get_logger().info("Received ur5e robot description")
         self._ur5e_msg = msg
-        self.save_file(os.path.join(self._root_folder, "ur5e.urdf"), msg.data)
+        # self.save_file(
+        # os.path.join(self._root_folder, "ur5e.urdf"), msg.data)
 
     def run(self):
         while rclpy.ok():
@@ -70,9 +72,9 @@ class TestRobotDescriptionMap(Node):
         self._robot_description_map_publisher.publish(
             robot_description_map_msg)
 
-        self.save_file(os.path.join(self._root_folder, "fr3+ur5e.message"),
-                       serialize_message(
-                           robot_description_map_msg), mode="wb")
+        # self.save_file(os.path.join(self._root_folder, "fr3+ur5e.message"),
+        #                serialize_message(
+        #                    robot_description_map_msg), mode="wb")
 
     def save_file(self, filename, content, mode="w"):
         with open(filename, mode) as f:
