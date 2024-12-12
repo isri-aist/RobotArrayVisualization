@@ -54,7 +54,7 @@ jobs:
                 cloudsmith: mc-rtc/${{ matrix.mc-rtc-version }}
             apt: libboost-all-dev librbdyn-dev doxygen graphviz
           ros: |
-            apt: ros-base launch-testing
+            apt: ros-base
       - name: Setup display
         run: |
           set -e
@@ -83,9 +83,9 @@ jobs:
           sleep 1s
           if [ "${{ matrix.test-name }}" == "TestSingleRobotStateArrayDisplay" ]
           then
-            launch_testing src/robot_array_rviz_plugins/tests/scripts/testSingleRobotStateArrayClient.py
+            launch_test src/robot_array_rviz_plugins/tests/scripts/testSingleRobotStateArrayClient.py
           else
-            launch_testing src/robot_array_rviz_plugins/tests/scripts/testMultiRobotStateArrayClient.py
+            launch_test src/robot_array_rviz_plugins/tests/scripts/testMultiRobotStateArrayClient.py
           fi
           sleep 30s
           kill -2 ${FFMPEG_PID}
