@@ -54,7 +54,7 @@ jobs:
                 cloudsmith: mc-rtc/${{ matrix.mc-rtc-version }}
             apt: libboost-all-dev librbdyn-dev doxygen graphviz
           ros: |
-            apt: ros-base
+            apt: ros-base launch-testing
       - name: Setup display
         run: |
           set -e
