@@ -84,12 +84,14 @@ def generate_test_description():
 
     return launch.LaunchDescription([
         rviz2_node,
-        description_node,
+        launch.actions.TimerAction(
+            period=2.5, actions=[description_node],
+        ),
         launch.actions.TimerAction(
             period=5.0, actions=[fr3_group, ur5e_group],
         ),
         launch.actions.TimerAction(
-            period=15.0, actions=[launch_testing.actions.ReadyToTest()],
+            period=12.5, actions=[launch_testing.actions.ReadyToTest()],
         ),
     ]), context
 
