@@ -309,6 +309,8 @@ void SingleRobotStateArrayDisplay::changedRobotDescriptionFile()
     urdf_content_ = content;
 
     loadUrdfModel();
+
+    setStatus(rviz_common::properties::StatusProperty::Ok, "URDF", "URDF is loaded");
   }
 } 
 
