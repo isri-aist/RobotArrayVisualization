@@ -2,6 +2,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/serialization.hpp>
+#include <nlohmann/json.hpp>
 #include <RBDyn/MultiBodyConfig.h>
 
 #include <robot_array_msgs/msg/robot_state_array.hpp>
@@ -11,6 +12,8 @@
 #include <std_msgs/msg/string.hpp>
 #include <rviz_common/display.hpp>
 #include <urdf/model.h>
+
+using namespace nlohmann;
 
 namespace rviz_common
 {
@@ -76,6 +79,10 @@ private Q_SLOTS:
 
   void changedRobotDescriptionFile();
 
+  void resetRobotDescriptionFile();
+
+  void changedRobotDescriptionRecovery();
+
   void changedRobotDescriptionSource();
 
   void changedRobotStateTopic();
@@ -89,6 +96,8 @@ private Q_SLOTS:
 protected:
   rviz_common::properties::RosTopicProperty * robot_description_property_;
   rviz_common::properties::EnumProperty * robot_description_source_property_;
+  rviz_common::properties::BoolProperty * robot_description_file_reset_property_;
+  rviz_common::properties::StringProperty * robot_description_recovery_property_;
   rviz_common::properties::FilePickerProperty * robot_description_file_property_;
   rviz_common::properties::RosTopicProperty * topic_property_;
   rviz_common::properties::IntProperty * robot_num_property_;
@@ -102,6 +111,7 @@ protected:
 
   std::shared_ptr<RobotStateArrayVisual> visual_;
 
+  json robot_description_file_json_;
   std::unordered_map<std::string, urdf::ModelInterfaceSharedPtr> urdf_model_map_;
   std::shared_ptr<robot_array_msgs::msg::RobotDescriptionArray> robot_description_array_;
 

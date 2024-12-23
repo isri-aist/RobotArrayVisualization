@@ -29,5 +29,5 @@ ament_target_dependencies(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${OGRE_PREFIX_DIR}/include")
-target_link_libraries(${PROJECT_NAME} RBDyn::RBDyn RBDyn::Parsers
+target_link_libraries(${PROJECT_NAME} RBDyn::RBDyn RBDyn::Parsers nlohmann_json::nlohmann_json
                       ${QT_LIBRARIES})

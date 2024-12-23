@@ -12,6 +12,7 @@ find_package(rviz2 REQUIRED)
 find_package(rviz_common REQUIRED)
 find_package(rviz_default_plugins REQUIRED)
 find_package(robot_array_msgs REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 add_subdirectory(src)
 

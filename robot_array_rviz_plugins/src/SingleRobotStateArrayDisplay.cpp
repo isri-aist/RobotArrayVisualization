@@ -296,8 +296,6 @@ void SingleRobotStateArrayDisplay::changedRobotDescriptionFile()
       content = urdf_file.readAll().toStdString();
       urdf_file.close();
     }
-    RCLCPP_INFO(nh_->get_logger(), "Loaded URDF from %s", robot_description_file_property_->getString().toStdString().c_str());
-    RCLCPP_INFO(nh_->get_logger(), "URDF content: %s", content.c_str());
     if (content.empty()) {
       setStatus(rviz_common::properties::StatusProperty::Error, "URDF", "URDF is empty");
       return;
