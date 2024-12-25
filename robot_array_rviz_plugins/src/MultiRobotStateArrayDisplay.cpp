@@ -45,8 +45,7 @@ MultiRobotStateArrayDisplay::MultiRobotStateArrayDisplay()
 
   robot_description_recovery_property_ = new rviz_common::properties::StringProperty(
       "Recovery", "", 
-      "Recovery from the error of the robot description", this,
-      SLOT(changedRobotDescriptionRecovery()));
+      "Recovery from the error of the robot description", this);
   robot_description_recovery_property_->setHidden(true);
 
   robot_description_file_property_ = new rviz_common::properties::FilePickerProperty(
@@ -142,7 +141,6 @@ void MultiRobotStateArrayDisplay::onEnable()
     loadUrdfModel();
     robot_inited_ = true;
   }
-  changedRobotDescriptionRecovery();
   changedRobotDescriptionSource();
   changedRobotStateTopic();
   changedColorStyle();
@@ -299,7 +297,6 @@ void MultiRobotStateArrayDisplay::loadUrdfModel()
   {
     const std::string & robot_name = robot_description.name;
     const std::string & urdf_content = robot_description.urdf_content;
-    std::cout << "robot_name: " << robot_name << std::endl;
     // set URDF model
     std::unique_ptr<urdf::Model> urdf_model(new urdf::Model());
     if(!urdf_model->initString(urdf_content))
@@ -339,32 +336,35 @@ void MultiRobotStateArrayDisplay::changedRobotDescriptionSource()
 
 void MultiRobotStateArrayDisplay::resetRobotDescriptionFile()
 {
-  // remove all children except the Reset property
   robot_description_file_property_->removeChildren(1);
   robot_description_file_reset_property_->setValue(false);
-  robot_description_recovery_property_->setString("");
+  robot_description_recovery_property_->setStdString("");
+  robot_description_file_json_.clear();
 }
 
 void MultiRobotStateArrayDisplay::changedRobotDescriptionFile()
 {
   if (robot_description_source_property_->getOptionInt() != DescriptionSource::FILE_SOURCE) return;
   if (robot_description_file_property_->getString().isEmpty()) return;
-  std::string content;
   std::string robot_description_file = robot_description_file_property_->getString().toStdString();
-  QFile urdf_file(QString::fromStdString(robot_description_file));
-  if (urdf_file.open(QIODevice::ReadOnly)) {
-    content = urdf_file.readAll().toStdString();
-    urdf_file.close();
-  }  
-  if (!robot_description_file_json_.contains(robot_description_file)) {
-    std::cout << "here" << std::endl;
-    robot_description_file_json_[robot_description_file] = content;
+   if (!robot_description_recovery_property_->getStdString().empty()) {
+    robot_description_file_json_ = json::parse(robot_description_recovery_property_->getStdString());
   }
-  robot_description_recovery_property_->setString(QString::fromStdString(robot_description_file_json_.dump()));
-  auto array = std::make_shared<robot_array_msgs::msg::RobotDescriptionArray>();
+  if (!robot_description_file_json_.contains(robot_description_file)) {
+    robot_description_file_json_[robot_description_file] = "";
+  }
+  robot_description_recovery_property_->setStdString(robot_description_file_json_.dump());
   robot_description_file_property_->removeChildren(1);
-  for (auto & [file, content] : robot_description_file_json_.items()) {
-    std::cout << "file: " << file << std::endl;
+  robot_description_array_ = std::make_shared<robot_array_msgs::msg::RobotDescriptionArray>();
+  robot_description_array_->robot_descriptions = {};
+  robot_array_msgs::msg::RobotDescriptionArray::SharedPtr array = std::make_shared<robot_array_msgs::msg::RobotDescriptionArray>();
+  for (auto & [file, empty_content] : robot_description_file_json_.items()) {
+    std::string content;
+    QFile urdf_file(QString::fromStdString(file));
+    if (urdf_file.open(QIODevice::ReadOnly)) {
+      content = urdf_file.readAll().toStdString();
+      urdf_file.close();
+    }  
     rviz_common::properties::StringProperty * file_property = new rviz_common::properties::StringProperty(
         "", file.c_str(), "The file path to the robot description.", 
         robot_description_file_property_);
@@ -372,18 +372,10 @@ void MultiRobotStateArrayDisplay::changedRobotDescriptionFile()
     std::string robot_name = std::filesystem::path(file).stem().string();
     robot_description.name = robot_name;
     robot_description.urdf_content = content;
-    array->robot_descriptions.push_back(robot_description);
+    robot_description_array_->robot_descriptions.push_back(robot_description);
   }
-  robot_description_array_ = array;
   loadUrdfModel();
 } 
-
-void MultiRobotStateArrayDisplay::changedRobotDescriptionRecovery()
-{
-  if (!robot_description_recovery_property_->getStdString().empty()) {
-    robot_description_file_json_ = json::parse(robot_description_recovery_property_->getStdString());
-  }
-}
 
 void MultiRobotStateArrayDisplay::changedRobotStateTopic()
 {

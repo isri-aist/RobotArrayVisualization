@@ -81,8 +81,6 @@ private Q_SLOTS:
 
   void resetRobotDescriptionFile();
 
-  void changedRobotDescriptionRecovery();
-
   void changedRobotDescriptionSource();
 
   void changedRobotStateTopic();
