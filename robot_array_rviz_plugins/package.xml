@@ -21,7 +21,8 @@
   <depend>rviz2</depend>
   <depend>eigen</depend>
   <depend>qtbase5-dev</depend>
-  <depend>nlohmann_json</depend>
+  <depend>nlohmann-json-dev</depend>
+  <depend>xacro</depend>
 
   <test_depend>ros_testing</test_depend>
   <test_depend>franka_description</test_depend>
