@@ -41,9 +41,7 @@ def generate_test_description():
 
     return launch.LaunchDescription([
         rviz2_node,
-        launch.actions.TimerAction(
-            period=10.0, actions=[launch_testing.actions.ReadyToTest()],
-        ),
+        launch_testing.actions.ReadyToTest()
     ]), context
 
 
@@ -77,7 +75,7 @@ class TestSingleRobotStateArrayClientWithFile(unittest.TestCase):
         rate = node.create_rate(1000)
         start_t = rclpy.clock.Clock().now().nanoseconds / 1e9
         fail_count = 0
-        fail_count_thre = 20
+        fail_count_thre = 100
         while rclpy.ok():
             t = rclpy.clock.Clock().now().nanoseconds / 1e9
 
@@ -94,7 +92,7 @@ class TestSingleRobotStateArrayClientWithFile(unittest.TestCase):
 
             pub.publish(robot_state_arr_msg)
 
-            if rosnode_ping("rviz2", max_count=1):
+            if rosnode_ping(node, "rviz2", max_count=1):
                 fail_count = 0
             else:
                 fail_count += 1
@@ -109,5 +107,9 @@ class TestSingleRobotStateArrayClientWithFile(unittest.TestCase):
             rate.sleep()
 
 
-def rosnode_ping(node_name, max_count):
-    return True
+def rosnode_ping(node, node_name, max_count):
+    node_names = node.get_node_names()
+    if node_name in node_names:
+        return True
+    else:
+        return False

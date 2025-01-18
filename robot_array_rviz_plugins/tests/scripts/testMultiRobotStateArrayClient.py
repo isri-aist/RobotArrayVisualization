@@ -13,10 +13,8 @@ import pytest
 import launch
 import launch_testing
 import launch_testing.actions
-from launch.actions import GroupAction
-from launch_ros.actions import Node, PushRosNamespace
+from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 
 @pytest.mark.launch_test
@@ -24,41 +22,6 @@ def generate_test_description():
     robot_array_rviz_plugins_package = FindPackageShare(
             package="robot_array_rviz_plugins").find(
             "robot_array_rviz_plugins")
-
-    fr3_launch_file = os.path.join(
-        robot_array_rviz_plugins_package,
-        "tests",
-        "launch",
-        "fr3_description.launch.py")
-
-    fr3_launch = launch.actions.IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(fr3_launch_file),
-        launch_arguments={
-            "arm_id": "fr3",
-            "load_gripper": "false"
-        }.items(),
-    )
-
-    fr3_group = GroupAction(
-        actions=[PushRosNamespace('fr3'), fr3_launch]
-    )
-
-    ur5e_launch_file = os.path.join(
-        robot_array_rviz_plugins_package,
-        "tests",
-        "launch",
-        "ur_description.launch.py")
-
-    ur5e_launch = launch.actions.IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(ur5e_launch_file),
-        launch_arguments={
-            "ur_type": "ur5e",
-        }.items()
-    )
-
-    ur5e_group = GroupAction(
-        actions=[PushRosNamespace('ur5e'), ur5e_launch]
-    )
 
     rviz_config_file = os.path.join(
         robot_array_rviz_plugins_package,
@@ -84,15 +47,8 @@ def generate_test_description():
 
     return launch.LaunchDescription([
         rviz2_node,
-        launch.actions.TimerAction(
-            period=2.5, actions=[description_node],
-        ),
-        launch.actions.TimerAction(
-            period=5.0, actions=[fr3_group, ur5e_group],
-        ),
-        launch.actions.TimerAction(
-            period=12.5, actions=[launch_testing.actions.ReadyToTest()],
-        ),
+        description_node,
+        launch_testing.actions.ReadyToTest()
     ]), context
 
 
@@ -144,7 +100,7 @@ class TestMultiRobotStateArrayClient(unittest.TestCase):
         rate = node.create_rate(1000)
         start_t = rclpy.clock.Clock().now().nanoseconds / 1e9
         fail_count = 0
-        fail_count_thre = 20
+        fail_count_thre = 100
         while rclpy.ok():
             t = rclpy.clock.Clock().now().nanoseconds / 1e9
 
@@ -175,7 +131,7 @@ class TestMultiRobotStateArrayClient(unittest.TestCase):
 
             pub.publish(robot_state_arr_msg)
 
-            if rosnode_ping("rviz2", max_count=1):
+            if rosnode_ping(node, "rviz2", max_count=1):
                 fail_count = 0
             else:
                 fail_count += 1
@@ -190,5 +146,9 @@ class TestMultiRobotStateArrayClient(unittest.TestCase):
             rate.sleep()
 
 
-def rosnode_ping(node_name, max_count):
-    return True
+def rosnode_ping(node, node_name, max_count):
+    node_names = node.get_node_names()
+    if node_name in node_names:
+        return True
+    else:
+        return False

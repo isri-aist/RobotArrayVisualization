@@ -1,11 +1,13 @@
 #! /usr/bin/env python3
 
-# import os
+import os
 import sys
+import time
+import xacro
 import rclpy
 from rclpy.node import Node
-# from rclpy.serialization import serialize_message
-from std_msgs.msg import String
+from rclpy.qos import QoSProfile, DurabilityPolicy
+from ament_index_python.packages import get_package_share_directory
 from robot_array_msgs.msg import RobotDescription, RobotDescriptionArray
 
 
@@ -13,44 +15,59 @@ class TestRobotDescriptionMap(Node):
     def __init__(self):
         super().__init__("test_robot_description_map")
 
-        _ = self.create_subscription(
-            String, "/fr3/robot_description", self.fr3_callback, 10)
+        ur5_mappings = {
+            "safety_limits": "true",
+            "safety_pos_margin": "0.15",
+            "safety_k_position": "20",
+            "name": "ur",
+            "tf_prefix": "",
+            "ur_type": "ur5e"
+        }
 
-        _ = self.create_subscription(
-            String, "/ur5e/robot_description", self.ur5e_callback, 10)
+        fr3_mappings = {
+            "hand": "true",
+            "ee_id": "franka_hand"
+        }
+
+        ur5_file_path = os.path.join(
+            get_package_share_directory("ur_description"),
+            "urdf",
+            "ur.urdf.xacro"
+        )
+
+        fr3_file_path = os.path.join(
+            get_package_share_directory("franka_description"),
+            "robots",
+            "fr3",
+            "fr3.urdf.xacro"
+        )
+
+        self._ur5e_description = self.create_urdf(
+            ur5_file_path, ur5_mappings)
+
+        self._fr3_description = self.create_urdf(
+            fr3_file_path, fr3_mappings)
+
+        qos_profile = QoSProfile(depth=1)
+        qos_profile.durability = DurabilityPolicy.TRANSIENT_LOCAL
 
         self._robot_description_map_publisher = self.create_publisher(
-            RobotDescriptionArray, "robot_description_map", 1)
+            RobotDescriptionArray, "robot_description_map",
+            qos_profile=qos_profile)
+        
+        time.sleep(0.5)
 
-        self._fr3_msg, self._ur5e_msg = None, None
+        self.publish_robot_description_map()
 
-        self._root_folder = "/root/catkin_ws/src/robot_array_rviz_plugins/" \
-            "tests/urdf"
+    def create_urdf(self, xacro_file, mappings):
+        urdf = xacro.process_file(
+            xacro_file, mappings=mappings)
 
-    def fr3_callback(self, msg):
-        self.get_logger().info("Received fr3 robot description")
-        self._fr3_msg = msg
-        # self.save_file(
-        # os.path.join(self._root_folder, "fr3.urdf"), msg.data)
+        urdf_file = urdf.toprettyxml(indent="  ")
 
-    def ur5e_callback(self, msg):
-        self.get_logger().info("Received ur5e robot description")
-        self._ur5e_msg = msg
-        # self.save_file(
-        # os.path.join(self._root_folder, "ur5e.urdf"), msg.data)
+        return urdf_file        
 
-    def run(self):
-        while rclpy.ok():
-            rclpy.spin_once(self)
-            if self._fr3_msg is None or self._ur5e_msg is None:
-                continue
-
-            self.publish_robot_description_map(
-                self._fr3_msg, self._ur5e_msg)
-
-            break
-
-    def publish_robot_description_map(self, fr3_msg, ur5e_msg):
+    def publish_robot_description_map(self):
         self.get_logger().info("Publishing robot description map")
         robot_description_map_msg = RobotDescriptionArray()
 
@@ -58,13 +75,13 @@ class TestRobotDescriptionMap(Node):
 
         fr3_description.name = "fr3"
 
-        fr3_description.urdf_content = fr3_msg.data
+        fr3_description.urdf_content = self._fr3_description
 
         ur5e_description = RobotDescription()
 
         ur5e_description.name = "ur5e"
 
-        ur5e_description.urdf_content = ur5e_msg.data
+        ur5e_description.urdf_content = self._ur5e_description
 
         robot_description_map_msg.robot_descriptions = [
             ur5e_description, fr3_description]
@@ -72,21 +89,11 @@ class TestRobotDescriptionMap(Node):
         self._robot_description_map_publisher.publish(
             robot_description_map_msg)
 
-        # self.save_file(os.path.join(self._root_folder, "fr3+ur5e.message"),
-        #                serialize_message(
-        #                    robot_description_map_msg), mode="wb")
-
-    def save_file(self, filename, content, mode="w"):
-        with open(filename, mode) as f:
-            f.write(content)
-
 
 def main(args=None):
     rclpy.init(args=args)
 
     test_robot_description_map = TestRobotDescriptionMap()
-
-    test_robot_description_map.run()
 
     test_robot_description_map.destroy_node()
 

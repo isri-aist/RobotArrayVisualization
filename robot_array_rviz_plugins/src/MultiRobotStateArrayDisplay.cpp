@@ -138,7 +138,6 @@ void MultiRobotStateArrayDisplay::onEnable()
   Display::onEnable();
   if(!robot_inited_)
   {
-    loadUrdfModel();
     robot_inited_ = true;
   }
   changedRobotDescriptionSource();
@@ -398,9 +397,12 @@ void MultiRobotStateArrayDisplay::changedRobotDescriptionTopic()
 
   setStatus(rviz_common::properties::StatusProperty::Warn, "MultiRobotStateArrayDisplay", "No message received");
 
+  rclcpp::QoS qos(rclcpp::KeepLast(10));
+  qos.transient_local();
+
   robot_description_subscriber_ =
     nh_->create_subscription<robot_array_msgs::msg::RobotDescriptionArray>(
-        robot_description_property_->getStdString(), rclcpp::QoS(10), std::bind(&MultiRobotStateArrayDisplay::robotDescriptionCallback, this, std::placeholders::_1));
+        robot_description_property_->getStdString(), qos, std::bind(&MultiRobotStateArrayDisplay::robotDescriptionCallback, this, std::placeholders::_1));
 }
 
 void MultiRobotStateArrayDisplay::changedMaxRobotNum()

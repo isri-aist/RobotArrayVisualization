@@ -12,7 +12,6 @@ install(PROGRAMS scripts/testRobotDescriptionMap.py
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY 
-  launch
   rviz
   scripts 
   DESTINATION share/${PROJECT_NAME}/tests)
