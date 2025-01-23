@@ -32,9 +32,9 @@ def main(args=None):
         "fr3.urdf.xacro"
     )
 
-    create_urdf(ur5_file_path, ur5_mappings, "test.ur5.urdf")
+    create_urdf(ur5_file_path, ur5_mappings, "ur5.urdf")
 
-    create_urdf(fr3_file_path, fr3_mappings, "test.fr3.urdf")
+    create_urdf(fr3_file_path, fr3_mappings, "fr3.urdf")
 
 
 def create_urdf(xacro_file, mappings, output_file):
