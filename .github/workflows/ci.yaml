@@ -94,7 +94,7 @@ jobs:
           ffmpeg -nostats -i /tmp/video.avi /tmp/results/RARP-video-${{ matrix.test-name }}.mp4
       - name: Upload video
         if: env.RUN_RECORDING_STEPS == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: RARP-ci-results
           path: /tmp/results
