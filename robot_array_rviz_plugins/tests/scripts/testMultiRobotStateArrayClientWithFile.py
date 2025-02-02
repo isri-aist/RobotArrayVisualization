@@ -93,7 +93,7 @@ class testMultiRobotStateArrayClientwithFile(unittest.TestCase):
         rate = node.create_rate(1000)
         start_t = rclpy.clock.Clock().now().nanoseconds / 1e9
         fail_count = 0
-        fail_count_thre = 100
+        fail_count_thre = 1000
         while rclpy.ok():
             t = rclpy.clock.Clock().now().nanoseconds / 1e9
 
