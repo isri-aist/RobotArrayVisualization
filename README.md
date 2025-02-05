@@ -1,4 +1,4 @@
-**This is the branch for ROS2; use [the ros1 branch](https://github.com/isri-aist/RobotArrayVisualization/tree/ros1) for ROS1.**
+**This is the branch for ROS1.**
 
 # [RobotArrayVisualization](https://github.com/isri-aist/RobotArrayVisualization)
 ROS-based visualization library for robot arrays
