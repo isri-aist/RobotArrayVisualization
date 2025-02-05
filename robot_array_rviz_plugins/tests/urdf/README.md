@@ -8,4 +8,4 @@ Run scripts to generate the URDF files from the xacro files:
 python3 create_urdf.py
 ```
 
-The two file: fr3.urdf, ur5.urdf
+The two file: fr3.urdf, ur5e.urdf
