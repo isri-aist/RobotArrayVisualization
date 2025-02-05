@@ -40,7 +40,7 @@ public:
     }
     else
     {
-    //   ROS_ERROR_STREAM("link " << link_name << " not found in the RBDyn robot model.");
+      //   ROS_ERROR_STREAM("link " << link_name << " not found in the RBDyn robot model.");
       return false;
     }
 

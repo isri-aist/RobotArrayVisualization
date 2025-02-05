@@ -20,7 +20,7 @@ Display an array of single robots (i.e., robots with the same URDF model) from m
 
 #### Sample
 ```bash
-$ rostest robot_array_rviz_plugins TestSingleRobotStateArrayDisplay.test --text
+$ launch_test `ros2 pkg prefix robot_array_rviz_plugins`/share/robot_array_rviz_plugins/tests/scripts/testSingleRobotStateArrayClient.py
 ```
 
 https://github.com/isri-aist/RobotArrayVisualization/assets/6636600/4eae6e07-738d-490e-b254-1b02bcb04e8c
@@ -30,7 +30,7 @@ Display an array of multiple types of robots (i.e., robots with different URDF m
 
 #### Sample
 ```bash
-$ rostest robot_array_rviz_plugins TestMultiRobotStateArrayDisplay.test --text
+$ launch_test `ros2 pkg prefix robot_array_rviz_plugins`/share/robot_array_rviz_plugins/tests/scripts/testMultiRobotStateArrayClient.py
 ```
 
 https://github.com/isri-aist/RobotArrayVisualization/assets/6636600/5e33c0a1-9f30-4e1c-8373-fadb73d45124

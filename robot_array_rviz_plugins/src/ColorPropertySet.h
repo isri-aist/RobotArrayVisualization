@@ -11,7 +11,7 @@ namespace properties
 class BoolProperty;
 class FloatProperty;
 class ColorProperty;
-}
+} // namespace properties
 } // namespace rviz_common
 
 namespace RobotArrayRvizPlugins
@@ -21,7 +21,9 @@ class ColorPropertySet : public rviz_common::properties::Property
   Q_OBJECT
 
 public:
-  ColorPropertySet(const std::string & name, rviz_common::Display * display, rviz_common::properties::Property * parent_property);
+  ColorPropertySet(const std::string & name,
+                   rviz_common::Display * display,
+                   rviz_common::properties::Property * parent_property);
 
   void setName(const std::string & name);
 

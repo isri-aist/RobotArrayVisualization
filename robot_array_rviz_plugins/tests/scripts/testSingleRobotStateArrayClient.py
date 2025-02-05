@@ -17,8 +17,7 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def create_urdf(xacro_file, mappings):
-    urdf = xacro.process_file(
-        xacro_file, mappings=mappings)
+    urdf = xacro.process_file(xacro_file, mappings=mappings)
 
     urdf_file = urdf.toprettyxml(indent="  ")
 
@@ -28,14 +27,14 @@ def create_urdf(xacro_file, mappings):
 @pytest.mark.launch_test
 def generate_test_description():
     robot_array_rviz_plugins_package = FindPackageShare(
-            package="robot_array_rviz_plugins").find(
-            "robot_array_rviz_plugins")
+        package="robot_array_rviz_plugins"
+    ).find("robot_array_rviz_plugins")
 
     rviz_config_file = os.path.join(
         robot_array_rviz_plugins_package,
         "tests",
         "rviz",
-        "TestSingleRobotStateArrayDisplay.rviz"
+        "TestSingleRobotStateArrayDisplay.rviz",
     )
 
     fr3_mappings = {
@@ -44,11 +43,10 @@ def generate_test_description():
     }
 
     fr3_file_path = os.path.join(
-        FindPackageShare(package="franka_description").find(
-            "franka_description"),
+        FindPackageShare(package="franka_description").find("franka_description"),
         "robots",
         "fr3",
-        "fr3.urdf.xacro"
+        "fr3.urdf.xacro",
     )
 
     fr3_urdf = create_urdf(fr3_file_path, fr3_mappings)
@@ -60,7 +58,7 @@ def generate_test_description():
         output="screen",
         parameters=[
             {"robot_description": fr3_urdf},
-        ]
+        ],
     )
 
     rviz2_node = Node(
@@ -72,11 +70,12 @@ def generate_test_description():
 
     context = {}
 
-    return launch.LaunchDescription([
-        robot_state_publisher,
-        rviz2_node,
-        launch_testing.actions.ReadyToTest()
-    ]), context
+    return (
+        launch.LaunchDescription(
+            [robot_state_publisher, rviz2_node, launch_testing.actions.ReadyToTest()]
+        ),
+        context,
+    )
 
 
 class TestSingleRobotStateArrayClient(unittest.TestCase):
@@ -100,8 +99,7 @@ class TestSingleRobotStateArrayClient(unittest.TestCase):
         default_robot_state_msg.root_pose.pose.orientation.z = 0.0
         default_robot_state_msg.root_pose.pose.orientation.w = 1.0
         for j in range(1, 8):
-            default_robot_state_msg.joint_name_list.append(
-                "fr3_joint{}".format(j))
+            default_robot_state_msg.joint_name_list.append("fr3_joint{}".format(j))
             default_robot_state_msg.joint_pos_list.append(
                 -0.5 * np.pi if j == 4 else 0.0
             )

@@ -1,5 +1,5 @@
 # Generate robot description file for function input file of RobotArrayRvizPlugins
-Reference for robot description: 
+Reference for robot description:
 - [ur_description](https://github.com/UniversalRobots/Universal_Robots_ROS2_Description)
 - [franka_description](https://github.com/frankaemika/franka_description)
 

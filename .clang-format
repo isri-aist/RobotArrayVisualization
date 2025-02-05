@@ -60,7 +60,7 @@ IncludeCategories:
     Priority:        7
   - Regex:           '^(ros/)'
     Priority:        8
-  - Regex:           '^(<(nanomsg|geos|.*_msgs|ros|tf2.*)/)'
+  - Regex:           '^(<(nanomsg|geos|.*_msgs|ros|rclcpp|tf2.*)/)'
     Priority:        9
   - Regex:           '^(")'
     Priority:        10

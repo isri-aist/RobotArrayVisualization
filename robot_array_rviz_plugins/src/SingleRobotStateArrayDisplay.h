@@ -1,12 +1,13 @@
 #pragma once
 
 #include <RBDyn/MultiBodyConfig.h>
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/qos.hpp>
-#include <rclcpp/wait_for_message.hpp>
 
+#include <rclcpp/qos.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/wait_for_message.hpp>
 #include <robot_array_msgs/msg/robot_state_array.hpp>
 #include <std_msgs/msg/string.hpp>
+
 #include <rviz_common/display.hpp>
 #include <urdf/model.h>
 
@@ -21,7 +22,7 @@ class RosTopicProperty;
 class EnumProperty;
 class FilePickerProperty;
 } // namespace properties
-} // namespace rviz
+} // namespace rviz_common
 
 namespace RobotArrayRvizPlugins
 {

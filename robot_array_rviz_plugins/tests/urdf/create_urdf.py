@@ -11,7 +11,7 @@ def main(args=None):
         "safety_k_position": "20",
         "name": "ur",
         "tf_prefix": "",
-        "ur_type": "ur5e"
+        "ur_type": "ur5e",
     }
 
     fr3_mappings = {
@@ -20,16 +20,14 @@ def main(args=None):
     }
 
     ur5_file_path = os.path.join(
-        get_package_share_directory("ur_description"),
-        "urdf",
-        "ur.urdf.xacro"
+        get_package_share_directory("ur_description"), "urdf", "ur.urdf.xacro"
     )
 
     fr3_file_path = os.path.join(
         get_package_share_directory("franka_description"),
         "robots",
         "fr3",
-        "fr3.urdf.xacro"
+        "fr3.urdf.xacro",
     )
 
     create_urdf(ur5_file_path, ur5_mappings, "ur5.urdf")
@@ -38,9 +36,7 @@ def main(args=None):
 
 
 def create_urdf(xacro_file, mappings, output_file):
-
-    urdf = xacro.process_file(
-        xacro_file, mappings=mappings)
+    urdf = xacro.process_file(xacro_file, mappings=mappings)
 
     urdf_file = urdf.toprettyxml(indent="  ")
 

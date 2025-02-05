@@ -1,15 +1,15 @@
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/serialization.hpp>
-#include <nlohmann/json.hpp>
 #include <RBDyn/MultiBodyConfig.h>
 
-#include <robot_array_msgs/msg/robot_state_array.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/serialization.hpp>
 #include <robot_array_msgs/msg/robot_description_array.hpp>
+#include <robot_array_msgs/msg/robot_state_array.hpp>
+#include <std_msgs/msg/string.hpp>
 
 #include <OgreColourValue.h>
-#include <std_msgs/msg/string.hpp>
+#include <nlohmann/json.hpp>
 #include <rviz_common/display.hpp>
 #include <urdf/model.h>
 
@@ -24,8 +24,8 @@ class IntProperty;
 class RosTopicProperty;
 class EnumProperty;
 class FilePickerProperty;
-} 
-}// namespace rviz
+} // namespace properties
+} // namespace rviz_common
 
 namespace RobotArrayRvizPlugins
 {

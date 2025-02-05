@@ -9,32 +9,33 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 #include <QFile>
+#include <class_loader/class_loader.hpp>
+#include <filesystem>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
 #include <rviz_common/properties/enum_property.hpp>
+#include <rviz_common/properties/file_picker_property.hpp>
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
 #include <rviz_common/properties/string_property.hpp>
-#include <rviz_common/properties/file_picker_property.hpp>
+#include <rviz_common/visualization_manager.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
-#include <rviz_common/visualization_manager.hpp>
-#include <class_loader/class_loader.hpp>
-#include <filesystem>
 
 using namespace RobotArrayRvizPlugins;
 using namespace nlohmann;
 
 enum DescriptionSource
 {
-  TOPIC_SOURCE, FILE_SOURCE
+  TOPIC_SOURCE,
+  FILE_SOURCE
 };
 
 MultiRobotStateArrayDisplay::MultiRobotStateArrayDisplay()
 {
   robot_description_source_property_ = new rviz_common::properties::EnumProperty(
-      "Description Source", "Topic",
-      "Source to get the robot description from.", this, SLOT(changedRobotDescriptionSource()));
+      "Description Source", "Topic", "Source to get the robot description from.", this,
+      SLOT(changedRobotDescriptionSource()));
   robot_description_source_property_->addOption("Topic", DescriptionSource::TOPIC_SOURCE);
   robot_description_source_property_->addOption("File", DescriptionSource::FILE_SOURCE);
 
@@ -44,33 +45,31 @@ MultiRobotStateArrayDisplay::MultiRobotStateArrayDisplay()
       SLOT(changedRobotDescriptionTopic()), this);
 
   robot_description_recovery_property_ = new rviz_common::properties::StringProperty(
-      "Recovery", "", 
-      "Recovery from the error of the robot description", this);
+      "Recovery", "", "Recovery from the error of the robot description", this);
   robot_description_recovery_property_->setHidden(true);
 
   robot_description_file_property_ = new rviz_common::properties::FilePickerProperty(
-    "Description File", "",
-    "Path to the robot description.",
-    this, SLOT(changedRobotDescriptionFile()));
+      "Description File", "", "Path to the robot description.", this, SLOT(changedRobotDescriptionFile()));
 
   robot_description_file_reset_property_ = new rviz_common::properties::BoolProperty(
       "Reset", false, "Reset the list of the robot description files", robot_description_file_property_,
       SLOT(resetRobotDescriptionFile()), this);
 
   topic_property_ = new rviz_common::properties::RosTopicProperty(
-      "Robot State Array Topic", "robot_state_arr", rosidl_generator_traits::data_type<robot_array_msgs::msg::RobotStateArray>(),
+      "Robot State Array Topic", "robot_state_arr",
+      rosidl_generator_traits::data_type<robot_array_msgs::msg::RobotStateArray>(),
       "The topic on which the robot_array_msgs::RobotStateArray messages are received", this,
       SLOT(changedRobotStateTopic()), this);
 
-  robot_num_property_ = 
-      new rviz_common::properties::IntProperty("Max Robot Num", 5, "The maximum number of robots", this, SLOT(changedMaxRobotNum()), this);
+  robot_num_property_ = new rviz_common::properties::IntProperty("Max Robot Num", 5, "The maximum number of robots",
+                                                                 this, SLOT(changedMaxRobotNum()), this);
   robot_num_property_->setMin(1);
   robot_num_property_->setMax(1000);
 
   robots_property_ = new rviz_common::properties::Property("Robots", QVariant(), "", this);
 
-  color_style_property_ = new rviz_common::properties::EnumProperty("Robot Color Style", "Uniform", "The style of the robot color", this,
-                                                 SLOT(changedColorStyle()), this);
+  color_style_property_ = new rviz_common::properties::EnumProperty(
+      "Robot Color Style", "Uniform", "The style of the robot color", this, SLOT(changedColorStyle()), this);
   color_style_property_->addOptionStd("Uniform", static_cast<int>(ColorStyle::UNIFORM));
   color_style_property_->addOptionStd("Gradation per each robot", static_cast<int>(ColorStyle::GRADATION_EACH_ROBOT));
   color_style_property_->addOptionStd("Gradation per robot type", static_cast<int>(ColorStyle::GRADATION_ROBOT_TYPE));
@@ -121,9 +120,10 @@ void MultiRobotStateArrayDisplay::onInitialize()
   // nh_ = std::make_shared<rclcpp::Node>("multi_robot_state_array_display", "robot_array_rviz_plugins");
   nh_ = context_->getRosNodeAbstraction().lock()->get_raw_node();
   auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
-  if (!ros_node_abstraction)
+  if(!ros_node_abstraction)
   {
-    RCLCPP_WARN(nh_->get_logger(), "Unable to lock weak_ptr from DisplayContext in TrajectoryVisualization constructor");
+    RCLCPP_WARN(nh_->get_logger(),
+                "Unable to lock weak_ptr from DisplayContext in TrajectoryVisualization constructor");
     return;
   }
   robot_description_property_->initialize(ros_node_abstraction);
@@ -175,9 +175,10 @@ void MultiRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msgs
 
     if(urdf_model_map_.count(robot_name) == 0)
     {
-      RCLCPP_WARN_STREAM_THROTTLE(nh_->get_logger(), *nh_->get_clock(),
-          1.0, "Not found the URDF for the robot in the message, please check the ROS parameter. (robot_name: "
-                   << robot_name << ")");
+      RCLCPP_WARN_STREAM_THROTTLE(
+          nh_->get_logger(), *nh_->get_clock(), 1.0,
+          "Not found the URDF for the robot in the message, please check the ROS parameter. (robot_name: " << robot_name
+                                                                                                           << ")");
       continue;
     }
 
@@ -269,13 +270,15 @@ void MultiRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msgs
   }
 
   msg_num_++;
-  setStatus(rviz_common::properties::StatusProperty::Ok, "MultiRobotStateArrayDisplay", QString::number(msg_num_) + " messages received");
+  setStatus(rviz_common::properties::StatusProperty::Ok, "MultiRobotStateArrayDisplay",
+            QString::number(msg_num_) + " messages received");
 
   state_updated_ = true;
 }
 
-void MultiRobotStateArrayDisplay::robotDescriptionCallback(const robot_array_msgs::msg::RobotDescriptionArray::SharedPtr msg)
-{ 
+void MultiRobotStateArrayDisplay::robotDescriptionCallback(
+    const robot_array_msgs::msg::RobotDescriptionArray::SharedPtr msg)
+{
   robot_description_array_ = msg;
 
   loadUrdfModel();
@@ -300,7 +303,8 @@ void MultiRobotStateArrayDisplay::loadUrdfModel()
     std::unique_ptr<urdf::Model> urdf_model(new urdf::Model());
     if(!urdf_model->initString(urdf_content))
     {
-      RCLCPP_ERROR(nh_->get_logger(), "Failed to init a urdf model from robot_description. (robot_name: %s)", robot_name.c_str());
+      RCLCPP_ERROR(nh_->get_logger(), "Failed to init a urdf model from robot_description. (robot_name: %s)",
+                   robot_name.c_str());
       continue;
     }
     urdf_model_map_.emplace(robot_name, std::move(urdf_model));
@@ -321,11 +325,14 @@ void MultiRobotStateArrayDisplay::loadUrdfModel()
 
 void MultiRobotStateArrayDisplay::changedRobotDescriptionSource()
 {
-  if (robot_description_source_property_->getOptionInt() == DescriptionSource::TOPIC_SOURCE) {
+  if(robot_description_source_property_->getOptionInt() == DescriptionSource::TOPIC_SOURCE)
+  {
     robot_description_file_property_->setHidden(true);
     robot_description_property_->setHidden(false);
     changedRobotDescriptionTopic();
-  } else if (robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE) {
+  }
+  else if(robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE)
+  {
     robot_description_property_->setHidden(true);
     robot_description_file_property_->setHidden(false);
     robot_description_subscriber_.reset();
@@ -343,30 +350,34 @@ void MultiRobotStateArrayDisplay::resetRobotDescriptionFile()
 
 void MultiRobotStateArrayDisplay::changedRobotDescriptionFile()
 {
-  if (robot_description_source_property_->getOptionInt() != DescriptionSource::FILE_SOURCE) return;
-  if (robot_description_file_property_->getString().isEmpty()) return;
+  if(robot_description_source_property_->getOptionInt() != DescriptionSource::FILE_SOURCE) return;
+  if(robot_description_file_property_->getString().isEmpty()) return;
   std::string robot_description_file = robot_description_file_property_->getString().toStdString();
-   if (!robot_description_recovery_property_->getStdString().empty()) {
+  if(!robot_description_recovery_property_->getStdString().empty())
+  {
     robot_description_file_json_ = json::parse(robot_description_recovery_property_->getStdString());
   }
-  if (!robot_description_file_json_.contains(robot_description_file)) {
+  if(!robot_description_file_json_.contains(robot_description_file))
+  {
     robot_description_file_json_[robot_description_file] = "";
   }
   robot_description_recovery_property_->setStdString(robot_description_file_json_.dump());
   robot_description_file_property_->removeChildren(1);
   robot_description_array_ = std::make_shared<robot_array_msgs::msg::RobotDescriptionArray>();
   robot_description_array_->robot_descriptions = {};
-  robot_array_msgs::msg::RobotDescriptionArray::SharedPtr array = std::make_shared<robot_array_msgs::msg::RobotDescriptionArray>();
-  for (auto & [file, empty_content] : robot_description_file_json_.items()) {
+  robot_array_msgs::msg::RobotDescriptionArray::SharedPtr array =
+      std::make_shared<robot_array_msgs::msg::RobotDescriptionArray>();
+  for(auto & [file, empty_content] : robot_description_file_json_.items())
+  {
     std::string content;
     QFile urdf_file(QString::fromStdString(file));
-    if (urdf_file.open(QIODevice::ReadOnly)) {
+    if(urdf_file.open(QIODevice::ReadOnly))
+    {
       content = urdf_file.readAll().toStdString();
       urdf_file.close();
-    }  
+    }
     rviz_common::properties::StringProperty * file_property = new rviz_common::properties::StringProperty(
-        "", file.c_str(), "The file path to the robot description.", 
-        robot_description_file_property_);
+        "", file.c_str(), "The file path to the robot description.", robot_description_file_property_);
     robot_array_msgs::msg::RobotDescription robot_description;
     std::string robot_name = std::filesystem::path(file).stem().string();
     robot_description.name = robot_name;
@@ -374,7 +385,7 @@ void MultiRobotStateArrayDisplay::changedRobotDescriptionFile()
     robot_description_array_->robot_descriptions.push_back(robot_description);
   }
   loadUrdfModel();
-} 
+}
 
 void MultiRobotStateArrayDisplay::changedRobotStateTopic()
 {
@@ -385,9 +396,9 @@ void MultiRobotStateArrayDisplay::changedRobotStateTopic()
   robot_num_ = 0;
   visual_->setVisible(robot_num_);
 
-robot_array_subscriber_ =
-    nh_->create_subscription<robot_array_msgs::msg::RobotStateArray>(
-        topic_property_->getStdString(), rclcpp::QoS(10), std::bind(&MultiRobotStateArrayDisplay::robotStateArrayCallback, this, std::placeholders::_1));
+  robot_array_subscriber_ = nh_->create_subscription<robot_array_msgs::msg::RobotStateArray>(
+      topic_property_->getStdString(), rclcpp::QoS(10),
+      std::bind(&MultiRobotStateArrayDisplay::robotStateArrayCallback, this, std::placeholders::_1));
   state_updated_ = true;
 }
 
@@ -400,9 +411,9 @@ void MultiRobotStateArrayDisplay::changedRobotDescriptionTopic()
   rclcpp::QoS qos(rclcpp::KeepLast(10));
   qos.transient_local();
 
-  robot_description_subscriber_ =
-    nh_->create_subscription<robot_array_msgs::msg::RobotDescriptionArray>(
-        robot_description_property_->getStdString(), qos, std::bind(&MultiRobotStateArrayDisplay::robotDescriptionCallback, this, std::placeholders::_1));
+  robot_description_subscriber_ = nh_->create_subscription<robot_array_msgs::msg::RobotDescriptionArray>(
+      robot_description_property_->getStdString(), qos,
+      std::bind(&MultiRobotStateArrayDisplay::robotDescriptionCallback, this, std::placeholders::_1));
 }
 
 void MultiRobotStateArrayDisplay::changedMaxRobotNum()

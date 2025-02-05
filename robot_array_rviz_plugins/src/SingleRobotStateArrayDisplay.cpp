@@ -9,62 +9,62 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 #include <QFile>
+#include <class_loader/class_loader.hpp>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
 #include <rviz_common/properties/bool_property.hpp>
 #include <rviz_common/properties/enum_property.hpp>
+#include <rviz_common/properties/file_picker_property.hpp>
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
 #include <rviz_common/properties/string_property.hpp>
-#include <rviz_common/properties/file_picker_property.hpp>
+#include <rviz_common/visualization_manager.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
-#include <rviz_common/visualization_manager.hpp>
-#include <class_loader/class_loader.hpp>
 
 using namespace RobotArrayRvizPlugins;
 
 enum DescriptionSource
 {
-  TOPIC_SOURCE, FILE_SOURCE
+  TOPIC_SOURCE,
+  FILE_SOURCE
 };
 
 SingleRobotStateArrayDisplay::SingleRobotStateArrayDisplay()
 {
   robot_description_source_property_ = new rviz_common::properties::EnumProperty(
-      "Description Source", "Topic",
-      "Source to get the robot description from.", this, SLOT(changedRobotDescriptionSource()));
+      "Description Source", "Topic", "Source to get the robot description from.", this,
+      SLOT(changedRobotDescriptionSource()));
   robot_description_source_property_->addOption("Topic", DescriptionSource::TOPIC_SOURCE);
   robot_description_source_property_->addOption("File", DescriptionSource::FILE_SOURCE);
 
   robot_description_property_ = new rviz_common::properties::RosTopicProperty(
       "Robot Description", "robot_description", rosidl_generator_traits::data_type<std_msgs::msg::String>(),
-      "The name of the ROS parameter where the URDF for the robot is loaded",
-      this, SLOT(changedRobotDescriptionTopic()), this);
+      "The name of the ROS parameter where the URDF for the robot is loaded", this,
+      SLOT(changedRobotDescriptionTopic()), this);
 
   robot_description_file_property_ = new rviz_common::properties::FilePickerProperty(
-    "Description File", "",
-    "Path to the robot description.",
-    this, SLOT(changedRobotDescriptionFile()));
+      "Description File", "", "Path to the robot description.", this, SLOT(changedRobotDescriptionFile()));
 
   topic_property_ = new rviz_common::properties::RosTopicProperty(
-      "Robot State Array Topic", "robot_state_arr", rosidl_generator_traits::data_type<robot_array_msgs::msg::RobotStateArray>(),
-      "The topic on which the robot_array_msgs::msg::RobotStateArray messages are received", 
-      this, SLOT(changedRobotStateTopic()), this);
+      "Robot State Array Topic", "robot_state_arr",
+      rosidl_generator_traits::data_type<robot_array_msgs::msg::RobotStateArray>(),
+      "The topic on which the robot_array_msgs::msg::RobotStateArray messages are received", this,
+      SLOT(changedRobotStateTopic()), this);
 
-  check_name_property_ =
-      new rviz_common::properties::BoolProperty("Check Name Consistency", false,
-                             "Whether to devisualize robots with inconsistent names between URDF and message", this);
+  check_name_property_ = new rviz_common::properties::BoolProperty(
+      "Check Name Consistency", false, "Whether to devisualize robots with inconsistent names between URDF and message",
+      this);
 
-  robot_num_property_ =
-      new rviz_common::properties::IntProperty("Max Robot Num", 5, "The maximum number of robots", this, SLOT(changedMaxRobotNum()), this);
+  robot_num_property_ = new rviz_common::properties::IntProperty("Max Robot Num", 5, "The maximum number of robots",
+                                                                 this, SLOT(changedMaxRobotNum()), this);
   robot_num_property_->setMin(1);
   robot_num_property_->setMax(1000);
 
   robots_property_ = new rviz_common::properties::Property("Robots", QVariant(), "", this);
 
-  color_style_property_ = new rviz_common::properties::EnumProperty("Robot Color Style", "Uniform", "The style of the robot color", this,
-                                                 SLOT(changedColorStyle()), this);
+  color_style_property_ = new rviz_common::properties::EnumProperty(
+      "Robot Color Style", "Uniform", "The style of the robot color", this, SLOT(changedColorStyle()), this);
   color_style_property_->addOptionStd("Uniform", static_cast<int>(ColorStyle::UNIFORM));
   color_style_property_->addOptionStd("First", static_cast<int>(ColorStyle::FIRST));
   color_style_property_->addOptionStd("First and Last", static_cast<int>(ColorStyle::FIRST_LAST));
@@ -110,9 +110,10 @@ void SingleRobotStateArrayDisplay::onInitialize()
   // nh_ = std::make_shared<rclcpp::Node>("single_robot_state_array_display", "robot_array_rviz_plugins");
   nh_ = context_->getRosNodeAbstraction().lock()->get_raw_node();
   auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
-  if (!ros_node_abstraction)
+  if(!ros_node_abstraction)
   {
-    RCLCPP_WARN(nh_->get_logger(), "Unable to lock weak_ptr from DisplayContext in TrajectoryVisualization constructor");
+    RCLCPP_WARN(nh_->get_logger(),
+                "Unable to lock weak_ptr from DisplayContext in TrajectoryVisualization constructor");
     return;
   }
   robot_description_property_->initialize(ros_node_abstraction);
@@ -222,7 +223,8 @@ void SingleRobotStateArrayDisplay::robotStateArrayCallback(const robot_array_msg
   }
 
   msg_num_++;
-  setStatus(rviz_common::properties::StatusProperty::Ok, "SingleRobotStateArrayDisplay", QString::number(msg_num_) + " messages received");
+  setStatus(rviz_common::properties::StatusProperty::Ok, "SingleRobotStateArrayDisplay",
+            QString::number(msg_num_) + " messages received");
 
   state_updated_ = true;
 }
@@ -236,7 +238,7 @@ void SingleRobotStateArrayDisplay::robotDescriptionCallback(const std_msgs::msg:
 
 void SingleRobotStateArrayDisplay::loadUrdfModel()
 {
-  if (urdf_content_.empty())
+  if(urdf_content_.empty())
   {
     RCLCPP_ERROR(nh_->get_logger(), "Failed to load a urdf model from robot_description.");
     return;
@@ -272,11 +274,14 @@ void SingleRobotStateArrayDisplay::loadUrdfModel()
 
 void SingleRobotStateArrayDisplay::changedRobotDescriptionSource()
 {
-  if (robot_description_source_property_->getOptionInt() == DescriptionSource::TOPIC_SOURCE) {
+  if(robot_description_source_property_->getOptionInt() == DescriptionSource::TOPIC_SOURCE)
+  {
     robot_description_file_property_->setHidden(true);
     robot_description_property_->setHidden(false);
     changedRobotDescriptionTopic();
-  } else if (robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE) {
+  }
+  else if(robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE)
+  {
     robot_description_property_->setHidden(true);
     robot_description_file_property_->setHidden(false);
     robot_description_subscriber_.reset();
@@ -286,20 +291,23 @@ void SingleRobotStateArrayDisplay::changedRobotDescriptionSource()
 
 void SingleRobotStateArrayDisplay::changedRobotDescriptionFile()
 {
-  if (robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE &&
-    !robot_description_source_property_->getString().isEmpty())
+  if(robot_description_source_property_->getOptionInt() == DescriptionSource::FILE_SOURCE
+     && !robot_description_source_property_->getString().isEmpty())
   {
     std::string content;
     QFile urdf_file(QString::fromStdString(robot_description_file_property_->getString().toStdString()));
-    if (urdf_file.open(QIODevice::ReadOnly)) {
+    if(urdf_file.open(QIODevice::ReadOnly))
+    {
       content = urdf_file.readAll().toStdString();
       urdf_file.close();
     }
-    if (content.empty()) {
+    if(content.empty())
+    {
       setStatus(rviz_common::properties::StatusProperty::Error, "URDF", "URDF is empty");
       return;
     }
-    if (content == urdf_content_) {
+    if(content == urdf_content_)
+    {
       return;
     }
 
@@ -309,7 +317,7 @@ void SingleRobotStateArrayDisplay::changedRobotDescriptionFile()
 
     setStatus(rviz_common::properties::StatusProperty::Ok, "URDF", "URDF is loaded");
   }
-} 
+}
 
 void SingleRobotStateArrayDisplay::changedRobotStateTopic()
 {
@@ -319,10 +327,10 @@ void SingleRobotStateArrayDisplay::changedRobotStateTopic()
 
   robot_num_ = 0;
   visual_->setVisible(robot_num_);
-  
-  robot_array_subscriber_ =
-    nh_->create_subscription<robot_array_msgs::msg::RobotStateArray>(
-        topic_property_->getStdString(), rclcpp::QoS(10), std::bind(&SingleRobotStateArrayDisplay::robotStateArrayCallback, this, std::placeholders::_1));
+
+  robot_array_subscriber_ = nh_->create_subscription<robot_array_msgs::msg::RobotStateArray>(
+      topic_property_->getStdString(), rclcpp::QoS(10),
+      std::bind(&SingleRobotStateArrayDisplay::robotStateArrayCallback, this, std::placeholders::_1));
 
   state_updated_ = true;
 }
@@ -335,9 +343,9 @@ void SingleRobotStateArrayDisplay::changedRobotDescriptionTopic()
   rclcpp::QoS qos(rclcpp::KeepLast(10));
   qos.transient_local();
 
-  robot_description_subscriber_ =
-    nh_->create_subscription<std_msgs::msg::String>(
-        robot_description_property_->getStdString(), qos, std::bind(&SingleRobotStateArrayDisplay::robotDescriptionCallback, this, std::placeholders::_1));
+  robot_description_subscriber_ = nh_->create_subscription<std_msgs::msg::String>(
+      robot_description_property_->getStdString(), qos,
+      std::bind(&SingleRobotStateArrayDisplay::robotDescriptionCallback, this, std::placeholders::_1));
 }
 
 void SingleRobotStateArrayDisplay::changedMaxRobotNum()

@@ -18,12 +18,12 @@ add_subdirectory(src)
 
 install(DIRECTORY icons DESTINATION share/${PROJECT_NAME})
 
-install(TARGETS ${PROJECT_NAME}
+install(
+  TARGETS ${PROJECT_NAME}
   EXPORT ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
+  RUNTIME DESTINATION bin)
 
 if(BUILD_TESTING)
   add_subdirectory(tests)

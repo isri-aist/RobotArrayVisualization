@@ -12,9 +12,9 @@
 #include <rviz_common/properties/property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
 #include <rviz_common/properties/string_property.hpp>
+#include <rviz_common/visualization_manager.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
-#include <rviz_common/visualization_manager.hpp>
 
 using namespace RobotArrayRvizPlugins;
 
@@ -84,7 +84,8 @@ void RobotStateArrayVisual::allocateRobotModel(int num,
     robot_property_list_.push_back(robot_property);
     robot_property->hide();
 
-    robot_list_.push_back(std::make_shared<rviz_default_plugins::robot::Robot>(root_node, context, robot_name, robot_property));
+    robot_list_.push_back(
+        std::make_shared<rviz_default_plugins::robot::Robot>(root_node, context, robot_name, robot_property));
   }
 }
 

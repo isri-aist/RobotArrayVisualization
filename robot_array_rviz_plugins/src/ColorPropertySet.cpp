@@ -6,20 +6,23 @@
 
 using namespace RobotArrayRvizPlugins;
 
-ColorPropertySet::ColorPropertySet(const std::string & name, rviz_common::Display * display, rviz_common::properties::Property * parent_property)
+ColorPropertySet::ColorPropertySet(const std::string & name,
+                                   rviz_common::Display * display,
+                                   rviz_common::properties::Property * parent_property)
 {
-  label_property_ = new rviz_common::properties::Property(QString::fromStdString(name), QVariant(), "", parent_property);
+  label_property_ =
+      new rviz_common::properties::Property(QString::fromStdString(name), QVariant(), "", parent_property);
   label_property_->expand();
 
-  original_property_ = new rviz_common::properties::BoolProperty("Original Color", true, "Whether the original color is used",
-                                              label_property_, SLOT(changedOriginal()), this);
+  original_property_ = new rviz_common::properties::BoolProperty(
+      "Original Color", true, "Whether the original color is used", label_property_, SLOT(changedOriginal()), this);
 
-  color_property_ = new rviz_common::properties::ColorProperty("Color", QColor(150, 50, 150), "The color of the robot links",
-                                            label_property_, SLOT(changedColor()), display);
+  color_property_ = new rviz_common::properties::ColorProperty(
+      "Color", QColor(150, 50, 150), "The color of the robot links", label_property_, SLOT(changedColor()), display);
   color_property_->hide();
 
-  alpha_property_ = new rviz_common::properties::FloatProperty("Alpha", 1.0f, "The alpha of the robot links", label_property_,
-                                            SLOT(changedColor()), display);
+  alpha_property_ = new rviz_common::properties::FloatProperty("Alpha", 1.0f, "The alpha of the robot links",
+                                                               label_property_, SLOT(changedColor()), display);
 }
 
 void ColorPropertySet::setName(const std::string & name)

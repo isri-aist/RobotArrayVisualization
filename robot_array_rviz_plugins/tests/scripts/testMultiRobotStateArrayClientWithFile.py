@@ -20,14 +20,14 @@ from launch_ros.substitutions import FindPackageShare
 @pytest.mark.launch_test
 def generate_test_description():
     robot_array_rviz_plugins_package = FindPackageShare(
-            package="robot_array_rviz_plugins").find(
-            "robot_array_rviz_plugins")
+        package="robot_array_rviz_plugins"
+    ).find("robot_array_rviz_plugins")
 
     rviz_config_file = os.path.join(
         robot_array_rviz_plugins_package,
         "tests",
         "rviz",
-        "TestMultiRobotStateArrayDisplayWithFile.rviz"
+        "TestMultiRobotStateArrayDisplayWithFile.rviz",
     )
 
     rviz2_node = Node(
@@ -39,10 +39,10 @@ def generate_test_description():
 
     context = {}
 
-    return launch.LaunchDescription([
-        rviz2_node,
-        launch_testing.actions.ReadyToTest()
-    ]), context
+    return (
+        launch.LaunchDescription([rviz2_node, launch_testing.actions.ReadyToTest()]),
+        context,
+    )
 
 
 class testMultiRobotStateArrayClientwithFile(unittest.TestCase):
