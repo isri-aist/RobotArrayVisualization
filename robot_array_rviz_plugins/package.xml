@@ -10,30 +10,28 @@
   <url>http://ros.org/wiki/robot_array_rviz_plugins</url>
   <author>Masaki Murooka</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>pkg-config</buildtool_depend>
 
-  <depend>roscpp</depend>
-  <depend>rviz</depend>
+  <depend>class_loader</depend>
+  <depend version_gte="1.11.2">pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
   <depend>robot_array_msgs</depend>
+  <depend>rviz2</depend>
+  <depend>eigen</depend>
+  <depend>qtbase5-dev</depend>
+  <depend>nlohmann-json-dev</depend>
+  <depend>xacro</depend>
 
-  <build_depend>eigen</build_depend>
-  <build_depend>libogre-dev</build_depend>
-  <build_depend>qtbase5-dev</build_depend>
-  <build_depend>libqt5-opengl-dev</build_depend>
-
-  <exec_depend>libqt5-core</exec_depend>
-  <exec_depend>libqt5-gui</exec_depend>
-  <exec_depend>libqt5-widgets</exec_depend>
-  <exec_depend>libqt5-opengl</exec_depend>
-
-  <test_depend>rosunit</test_depend>
-  <test_depend>rostest</test_depend>
+  <test_depend>ros_testing</test_depend>
   <test_depend>franka_description</test_depend>
   <test_depend>ur_description</test_depend>
 
   <doc_depend>doxygen</doc_depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
     <rviz plugin="${prefix}/plugin_description.xml"/>
   </export>
 </package>

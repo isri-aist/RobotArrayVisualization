@@ -27,13 +27,7 @@ def generate_test_description():
         robot_array_rviz_plugins_package,
         "tests",
         "rviz",
-        "TestMultiRobotStateArrayDisplay.rviz"
-    )
-
-    description_node = Node(
-        package="robot_array_rviz_plugins",
-        executable="testRobotDescriptionMap.py",
-        name="testRobotDescriptionMap",
+        "TestMultiRobotStateArrayDisplayWithFile.rviz"
     )
 
     rviz2_node = Node(
@@ -47,12 +41,11 @@ def generate_test_description():
 
     return launch.LaunchDescription([
         rviz2_node,
-        description_node,
         launch_testing.actions.ReadyToTest()
     ]), context
 
 
-class TestMultiRobotStateArrayClient(unittest.TestCase):
+class testMultiRobotStateArrayClientwithFile(unittest.TestCase):
     def __init__(self, *args):
         super().__init__(*args)
 

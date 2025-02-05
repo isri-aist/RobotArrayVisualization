@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
         build-type: [RelWithDebInfo, Debug]
         mc-rtc-version: [head, stable]
         compiler: [gcc]
@@ -24,7 +24,7 @@ jobs:
           - build-type: Debug
             mc-rtc-version: stable
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             build-type: RelWithDebInfo
             mc-rtc-version: head
             compiler: gcc
@@ -35,7 +35,7 @@ jobs:
         run: |
           set -e
           set -x
-          if [ "${{ matrix.os }}" == "ubuntu-20.04" ] && \
+          if [ "${{ matrix.os }}" == "ubuntu-22.04" ] && \
              [ "${{ matrix.build-type }}" == "RelWithDebInfo" ] && \
              [ "${{ matrix.mc-rtc-version }}" == "head" ] && \
              [ "${{ matrix.compiler }}" == "gcc" ]
@@ -52,7 +52,7 @@ jobs:
             apt-mirrors:
               mc-rtc:
                 cloudsmith: mc-rtc/${{ matrix.mc-rtc-version }}
-            apt: librbdyn-dev doxygen graphviz
+            apt: libboost-all-dev librbdyn-dev doxygen graphviz nlohmann-json3-dev
           ros: |
             apt: ros-base
       - name: Setup display
@@ -63,31 +63,38 @@ jobs:
           Xvfb ${{ env.DISPLAY }} -screen 0 1920x1080x24 &
           sleep 10s
           fluxbox 2> /dev/null &
-      - name: Catkin build
-        uses: jrl-umi3218/github-actions/build-catkin-project@master
+      - name: Colcon build
+        uses: jrl-umi3218/github-actions/build-colcon-project@master
         with:
           build-type: ${{ matrix.build-type }}
-          catkin-test-args: --no-deps
-          build-packages: robot_array_rviz_plugins
+          build-packages: robot_array_rviz_plugins robot_array_msgs
           test-packages: robot_array_rviz_plugins
       - name: Record video
         if: env.RUN_RECORDING_STEPS == 'true'
         run: |
-          . ${GITHUB_WORKSPACE}/catkin_ws/devel/setup.bash
           set -e
+          set -x
+          cd ${GITHUB_WORKSPACE}/colcon_ws
+          set +x
+          . install/setup.bash
           set -x
           ffmpeg -y -f x11grab -s 1920x1080 -r 30 -i ${DISPLAY} -qscale 0 -vcodec huffyuv /tmp/video.avi > /dev/null 2>&1 < /dev/null &
           FFMPEG_PID=$!
           sleep 1s
-          rostest robot_array_rviz_plugins ${{ matrix.test-name }}.test --text
-          sleep 5s
+          if [ "${{ matrix.test-name }}" == "TestSingleRobotStateArrayDisplay" ]
+          then
+            launch_test install/share/robot_array_rviz_plugins/tests/scripts/testSingleRobotStateArrayClient.py
+          else
+            launch_test install/share/robot_array_rviz_plugins/tests/scripts/testMultiRobotStateArrayClient.py
+          fi
+          sleep 30s
           kill -2 ${FFMPEG_PID}
           sleep 5s
           mkdir -p /tmp/results
           ffmpeg -nostats -i /tmp/video.avi /tmp/results/RARP-video-${{ matrix.test-name }}.mp4
       - name: Upload video
         if: env.RUN_RECORDING_STEPS == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: RARP-ci-results
+          name: RARP-ci-results-${{ matrix.test-name }}
           path: /tmp/results

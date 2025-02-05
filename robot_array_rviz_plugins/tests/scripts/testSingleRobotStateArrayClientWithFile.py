@@ -8,21 +8,13 @@ import rclpy
 from robot_array_msgs.msg import RobotState, RobotStateArray
 
 import os
-import xacro
 import pytest
 import launch
+import launch.actions
 import launch_testing
+import launch_testing.actions
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-
-
-def create_urdf(xacro_file, mappings):
-    urdf = xacro.process_file(
-        xacro_file, mappings=mappings)
-
-    urdf_file = urdf.toprettyxml(indent="  ")
-
-    return urdf_file
 
 
 @pytest.mark.launch_test
@@ -35,32 +27,7 @@ def generate_test_description():
         robot_array_rviz_plugins_package,
         "tests",
         "rviz",
-        "TestSingleRobotStateArrayDisplay.rviz"
-    )
-
-    fr3_mappings = {
-        "load_gripper": "false",
-        "arm_id": "fr3",
-    }
-
-    fr3_file_path = os.path.join(
-        FindPackageShare(package="franka_description").find(
-            "franka_description"),
-        "robots",
-        "fr3",
-        "fr3.urdf.xacro"
-    )
-
-    fr3_urdf = create_urdf(fr3_file_path, fr3_mappings)
-
-    robot_state_publisher = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        name="robot_state_publisher",
-        output="screen",
-        parameters=[
-            {"robot_description": fr3_urdf},
-        ]
+        "TestSingleRobotStateArrayDisplayWithFile.rviz"
     )
 
     rviz2_node = Node(
@@ -73,13 +40,12 @@ def generate_test_description():
     context = {}
 
     return launch.LaunchDescription([
-        robot_state_publisher,
         rviz2_node,
         launch_testing.actions.ReadyToTest()
     ]), context
 
 
-class TestSingleRobotStateArrayClient(unittest.TestCase):
+class TestSingleRobotStateArrayClientWithFile(unittest.TestCase):
     def __init__(self, *args):
         super().__init__(*args)
 

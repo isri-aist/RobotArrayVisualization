@@ -1,19 +1,26 @@
 #pragma once
 
 #include <RBDyn/MultiBodyConfig.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/qos.hpp>
+#include <rclcpp/wait_for_message.hpp>
 
-#include <robot_array_msgs/RobotStateArray.h>
-
-#include <rviz/display.h>
+#include <robot_array_msgs/msg/robot_state_array.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <rviz_common/display.hpp>
 #include <urdf/model.h>
 
-namespace rviz
+namespace rviz_common
+{
+namespace properties
 {
 class StringProperty;
 class BoolProperty;
 class IntProperty;
 class RosTopicProperty;
 class EnumProperty;
+class FilePickerProperty;
+} // namespace properties
 } // namespace rviz
 
 namespace RobotArrayRvizPlugins
@@ -21,7 +28,7 @@ namespace RobotArrayRvizPlugins
 class RobotStateArrayVisual;
 class ColorPropertySet;
 
-class SingleRobotStateArrayDisplay : public rviz::Display
+class SingleRobotStateArrayDisplay : public rviz_common::Display
 {
   Q_OBJECT
 
@@ -39,7 +46,7 @@ public:
 
   virtual ~SingleRobotStateArrayDisplay();
 
-  virtual void load(const rviz::Config & config) override;
+  virtual void load(const rviz_common::Config & config) override;
 
   virtual void update(float wall_dt, float ros_dt) override;
 
@@ -54,12 +61,18 @@ protected:
 
   virtual void fixedFrameChanged() override;
 
-  void robotStateArrayCallback(const robot_array_msgs::RobotStateArray::ConstPtr & msg);
+  void robotStateArrayCallback(const robot_array_msgs::msg::RobotStateArray::SharedPtr msg);
+
+  void robotDescriptionCallback(const std_msgs::msg::String::SharedPtr msg);
 
   void loadUrdfModel();
 
 private Q_SLOTS:
-  void changedRobotDescription();
+  void changedRobotDescriptionTopic();
+
+  void changedRobotDescriptionFile();
+
+  void changedRobotDescriptionSource();
 
   void changedRobotStateTopic();
 
@@ -70,20 +83,24 @@ private Q_SLOTS:
   void changedColor();
 
 protected:
-  rviz::StringProperty * robot_description_property_;
-  rviz::RosTopicProperty * topic_property_;
-  rviz::BoolProperty * check_name_property_;
-  rviz::IntProperty * robot_num_property_;
-  rviz::Property * robots_property_;
-  rviz::EnumProperty * color_style_property_;
+  rviz_common::properties::RosTopicProperty * robot_description_property_;
+  rviz_common::properties::EnumProperty * robot_description_source_property_;
+  rviz_common::properties::FilePickerProperty * robot_description_file_property_;
+  rviz_common::properties::RosTopicProperty * topic_property_;
+  rviz_common::properties::BoolProperty * check_name_property_;
+  rviz_common::properties::IntProperty * robot_num_property_;
+  rviz_common::properties::Property * robots_property_;
+  rviz_common::properties::EnumProperty * color_style_property_;
   std::vector<std::shared_ptr<ColorPropertySet>> color_property_sets_;
 
-  ros::NodeHandle nh_;
-  ros::Subscriber subscriber_;
+  rclcpp::Node::SharedPtr nh_;
+  rclcpp::Subscription<robot_array_msgs::msg::RobotStateArray>::SharedPtr robot_array_subscriber_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr robot_description_subscriber_;
 
   std::shared_ptr<RobotStateArrayVisual> visual_;
 
   urdf::ModelInterfaceSharedPtr urdf_model_;
+  std::string urdf_content_;
 
   rbd::MultiBody mb_;
   std::vector<rbd::MultiBodyConfig> mbc_list_;

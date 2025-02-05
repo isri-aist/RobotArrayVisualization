@@ -1,24 +1,27 @@
 #pragma once
 
 #include <OgreColourValue.h>
-#include <rviz/display.h>
-#include <rviz/properties/property.h>
+#include <rviz_common/display.hpp>
+#include <rviz_common/properties/property.hpp>
 
-namespace rviz
+namespace rviz_common
+{
+namespace properties
 {
 class BoolProperty;
 class FloatProperty;
 class ColorProperty;
-} // namespace rviz
+}
+} // namespace rviz_common
 
 namespace RobotArrayRvizPlugins
 {
-class ColorPropertySet : public rviz::Property
+class ColorPropertySet : public rviz_common::properties::Property
 {
   Q_OBJECT
 
 public:
-  ColorPropertySet(const std::string & name, rviz::Display * display, rviz::Property * parent_property);
+  ColorPropertySet(const std::string & name, rviz_common::Display * display, rviz_common::properties::Property * parent_property);
 
   void setName(const std::string & name);
 
@@ -32,9 +35,9 @@ private Q_SLOTS:
   void changedOriginal();
 
 public:
-  rviz::Property * label_property_;
-  rviz::BoolProperty * original_property_;
-  rviz::ColorProperty * color_property_;
-  rviz::FloatProperty * alpha_property_;
+  rviz_common::properties::Property * label_property_;
+  rviz_common::properties::BoolProperty * original_property_;
+  rviz_common::properties::ColorProperty * color_property_;
+  rviz_common::properties::FloatProperty * alpha_property_;
 };
 } // namespace RobotArrayRvizPlugins
