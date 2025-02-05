@@ -5,7 +5,7 @@ Rviz plugins for visualization of robot arrays
 
 ### Requirements
 - Compiler supporting C++17
-- Tested on `Ubuntu 20.04 / ROS Noetic`
+- Tested on `Ubuntu 22.04 / ROS2 Humble`
 
 ### Dependencies
 This package depends on
